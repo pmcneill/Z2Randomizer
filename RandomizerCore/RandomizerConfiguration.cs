@@ -1161,10 +1161,10 @@ public class RandomizerConfiguration
         properties.StartLifeLvl = StartingMagicLevel;
 
         //Overworld
-        properties.ShuffleEncounters = ShuffleEncounters == null ? random.Next(2) == 1 : (bool)ShuffleEncounters;
+        properties.ShuffleEncounters = ShuffleEncounters == null ? random.Next(4) != 1 : (bool)ShuffleEncounters;
         properties.AllowPathEnemies = AllowUnsafePathEncounters;
         properties.IncludeLavaInEncounterShuffle = IncludeLavaInEncounterShuffle;
-        properties.SwapPalaceCont = PalacesCanSwapContinents == null ? random.Next(2) == 1 : (bool)PalacesCanSwapContinents;
+        properties.SwapPalaceCont = PalacesCanSwapContinents == null ? random.Next(4) != 1 : (bool)PalacesCanSwapContinents;
         properties.P7shuffle = ShuffleGP == null ? random.Next(2) == 1 : (bool)ShuffleGP;
         properties.HiddenPalace = HidePalace == null ? random.Next(2) == 1 : (bool)HidePalace;
         properties.HiddenKasuto = HideKasuto == null ? random.Next(2) == 1 : (bool)HideKasuto;
@@ -1255,7 +1255,7 @@ public class RandomizerConfiguration
         }
         properties.VanillaShuffleUsesActualTerrain = VanillaShuffleUsesActualTerrain;
         properties.ShuffleHidden = ShuffleWhichLocationIsHidden == null ? random.Next(2) == 1 : (bool)ShuffleWhichLocationIsHidden;
-        properties.CanWalkOnWaterWithBoots = GoodBoots == null ? random.Next(2) == 1 : (bool)GoodBoots;
+        properties.CanWalkOnWaterWithBoots = GoodBoots == null ? random.Next(4) != 1 : (bool)GoodBoots;
         properties.BagusWoods = GenerateBaguWoods == null ? random.Next(2) == 1 : (bool)GenerateBaguWoods;
 
         //Palaces
@@ -1280,7 +1280,7 @@ public class RandomizerConfiguration
         properties.ShortenGP = ShortGP == null ? random.Next(2) == 1 : (bool)ShortGP;
         properties.RemoveTbird = RemoveTBird;
         properties.BossItem = RandomizeBossItemDrop;
-        properties.UseCommunityRooms = IncludeCommunityRooms == null ? random.Next(2) == 1 : (bool)IncludeCommunityRooms;
+        properties.UseCommunityRooms = IncludeCommunityRooms == null ? random.Next(4) != 1 : (bool)IncludeCommunityRooms;
         properties.BlockersAnywhere = BlockingRoomsInAnyPalace;
         properties.BossRoomConnect = BossRoomsExitToPalace == null ? random.Next(2) == 1 : (bool)BossRoomsExitToPalace;
         properties.NoDuplicateRooms = NoDuplicateRooms == null ? random.Next(2) == 1 : (bool)NoDuplicateRooms;
@@ -1291,9 +1291,9 @@ public class RandomizerConfiguration
         properties.ShuffleEnemyStealExp = ShuffleXPStealers;
         properties.ShuffleStealExpAmt = ShuffleXPStolenAmount;
         properties.ShuffleSwordImmunity = ShuffleSwordImmunity;
-        properties.ShuffleOverworldEnemies = ShuffleOverworldEnemies == null ? random.Next(2) == 1 : (bool)ShuffleOverworldEnemies;
-        properties.ShufflePalaceEnemies = ShufflePalaceEnemies == null ? random.Next(2) == 1 : (bool)ShufflePalaceEnemies;
-        properties.MixLargeAndSmallEnemies = MixLargeAndSmallEnemies == null ? random.Next(2) == 1 : (bool)MixLargeAndSmallEnemies;
+        properties.ShuffleOverworldEnemies = ShuffleOverworldEnemies == null ? random.Next(4) != 1 : (bool)ShuffleOverworldEnemies;
+        properties.ShufflePalaceEnemies = ShufflePalaceEnemies == null ? random.Next(4) != 1 : (bool)ShufflePalaceEnemies;
+        properties.MixLargeAndSmallEnemies = MixLargeAndSmallEnemies == null ? random.Next(4) != 1 : (bool)MixLargeAndSmallEnemies;
         properties.ShuffleDripper = ShuffleDripperEnemy;
         properties.ShuffleEnemyPalettes = ShuffleSpritePalettes;
         properties.ExpLevel = EnemyXPDrops;
@@ -1348,24 +1348,24 @@ public class RandomizerConfiguration
             properties.LifeEffectiveness = LifeEffectiveness;
         }
         properties.ShuffleLifeRefill = ShuffleLifeRefillAmount;
-        properties.ShuffleSpellLocations = ShuffleSpellLocations == null ? random.Next(2) == 1 : (bool)ShuffleSpellLocations;
+        properties.ShuffleSpellLocations = ShuffleSpellLocations == null ? random.Next(4) != 1 : (bool)ShuffleSpellLocations;
         properties.DisableMagicRecs = DisableMagicContainerRequirements == null ? random.Next(2) == 1 : (bool)DisableMagicContainerRequirements;
         properties.AttackCap = AttackLevelCap;
         properties.MagicCap = MagicLevelCap;
         properties.LifeCap = LifeLevelCap;
         properties.ScaleLevels = ScaleLevelRequirementsToCap;
         properties.HideLessImportantLocations = HideLessImportantLocations == null ? random.Next(2) == 1 : (bool)HideLessImportantLocations;
-        properties.SaneCaves = RestrictConnectionCaveShuffle == null ? random.Next(2) == 1 : (bool)RestrictConnectionCaveShuffle;
+        properties.SaneCaves = RestrictConnectionCaveShuffle == null ? random.Next(8) != 1 : (bool)RestrictConnectionCaveShuffle;
         properties.SpellEnemy = RandomizeSpellSpellEnemy == null ? random.Next(2) == 1 : (bool)RandomizeSpellSpellEnemy;
 
         //Items
-        properties.ShuffleOverworldItems = ShuffleOverworldItems == null ? random.Next(2) == 1 : (bool)ShuffleOverworldItems;
-        properties.ShufflePalaceItems = ShufflePalaceItems == null ? random.Next(2) == 1 : (bool)ShufflePalaceItems;
-        properties.MixOverworldPalaceItems = MixOverworldAndPalaceItems == null ? random.Next(2) == 1 : (bool)MixOverworldAndPalaceItems;
+        properties.ShuffleOverworldItems = ShuffleOverworldItems == null ? random.Next(4) != 1 : (bool)ShuffleOverworldItems;
+        properties.ShufflePalaceItems = ShufflePalaceItems == null ? random.Next(4) != 1 : (bool)ShufflePalaceItems;
+        properties.MixOverworldPalaceItems = MixOverworldAndPalaceItems == null ? random.Next(4) != 1 : (bool)MixOverworldAndPalaceItems;
         properties.ShuffleSmallItems = ShuffleSmallItems;
         properties.ExtraKeys = PalacesContainExtraKeys == null ? random.Next(2) == 1 : (bool)PalacesContainExtraKeys;
         properties.KasutoJars = RandomizeNewKasutoJarRequirements;
-        properties.PbagItemShuffle = IncludePBagCavesInItemShuffle == null ? random.Next(2) == 1 : (bool)IncludePBagCavesInItemShuffle;
+        properties.PbagItemShuffle = IncludePBagCavesInItemShuffle == null ? random.Next(4) != 1 : (bool)IncludePBagCavesInItemShuffle;
         properties.RemoveSpellItems = RemoveSpellItems == null ? random.Next(2) == 1 : (bool)RemoveSpellItems;
         properties.ShufflePbagXp = ShufflePBagAmounts == null ? random.Next(2) == 1 : (bool)ShufflePBagAmounts;
 
