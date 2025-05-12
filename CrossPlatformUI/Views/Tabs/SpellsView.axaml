@@ -69,6 +69,11 @@
             >
                 <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.DashAlwaysOnToolTip}"/></ToolTip.Tip>
             </CheckBox>
+            <CheckBox IsChecked="{Binding Main.Config.FasterDashFairy}"
+                      IsEnabled="{Binding FasterDashFairyIncludedObservable^}"
+                      Content="Faster Dash Fairy">
+                <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.FasterDashFairyToolTip}"/></ToolTip.Tip>
+            </CheckBox>
             <CheckBox
                 IsChecked="{Binding Main.Config.PermanentBeamSword}"
                 Content="Permanent Beam Sword"

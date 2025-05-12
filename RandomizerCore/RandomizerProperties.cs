@@ -224,6 +224,7 @@ public class RandomizerProperties
     public byte BeepThreshold { get; set; }
     public bool JumpAlwaysOn { get; set; }
     public bool DashAlwaysOn { get; set; }
+    public bool FasterDashFairy { get; set; }
     public bool FastCast { get; set; }
 
     public BeamSprites BeamSprite { get; set; }

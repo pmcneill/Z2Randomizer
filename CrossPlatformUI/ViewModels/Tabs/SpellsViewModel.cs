@@ -12,10 +12,16 @@ public class SpellsViewModel : ReactiveObject, IActivatableViewModel
     public ViewModelActivator Activator { get; }
     public MainViewModel Main { get; }
 
+    public IObservable<bool> FasterDashFairyIncludedObservable { get; }
+
     public SpellsViewModel(MainViewModel main)
     {
         Main = main;
         Activator = new();
+
+        FasterDashFairyIncludedObservable = Main.FlagsChanged
+            .Select(_ => Main.Config.fasterDashFairyIncluded())
+            .DistinctUntilChanged();
 
         this.WhenActivated(OnActivate);
     }
