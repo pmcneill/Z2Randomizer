@@ -179,6 +179,8 @@ public class RandomizerProperties
     //Fountain water / Saria mirror
     public bool IncludeQuestItemsInShuffle { get; set; }
     public bool IncludeBagusNoteInShuffle { get; set; }
+    public bool TownQuestLocationsAreMinorItems { get; set; }
+
     public bool RandomizeSmallItems { get; set; }
     public bool ExtraKeys { get; set; }
     public bool FastItemPickup { get; set; }
@@ -381,10 +383,18 @@ public class RandomizerProperties
 
         if(IncludeSwordTechsInShuffle)
         {
+            if (TownQuestLocationsAreMinorItems)
+            {
+                minorItemCount -= 2;
+            }
             minorItemCount += StartWithDownstab ? 1 : 0;
             minorItemCount += StartWithUpstab ? 1 : 0;
         }
 
+        if (IncludeQuestItemsInShuffle && TownQuestLocationsAreMinorItems)
+        {
+            minorItemCount -= 2;
+        }
 
         return minorItemCount >= 0;
     }

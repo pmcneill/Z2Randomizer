@@ -601,6 +601,11 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     [Reactive]
     private bool? includeBagusNoteInShuffle = false;
 
+    [Reactive]
+    [ConditionallyIncludeInFlags]
+    private bool townQuestLocationsAreMinorItems = false;
+    public bool townQuestLocationsAreMinorItemsIncluded() => includeSwordTechsInShuffle != false || includeQuestItemsInShuffle != false;
+
     //Drops
     [Reactive]
     private bool shuffleItemDropFrequency = false;
@@ -1024,6 +1029,12 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
 
             //Not settable yet
             properties.MaxMagicContainers = 8;
+
+            // Item shuffle settings that affect item slots
+            properties.StartWithSpellItems = removeSpellItems ?? GetIndeterminateFlagValue(r);
+            properties.IncludeQuestItemsInShuffle = includeQuestItemsInShuffle ?? GetIndeterminateFlagValue(r);
+            properties.IncludeSwordTechsInShuffle = includeSwordTechsInShuffle ?? GetIndeterminateFlagValue(r);
+            properties.TownQuestLocationsAreMinorItems = TownQuestLocationsAreMinorItems;
         } while (!properties.HasEnoughSpaceToAllocateItems());
 
         //Handle Fire
@@ -1405,10 +1416,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.FastItemPickup = fastItemPickup;
         properties.AllowImportantItemDuplicates = allowImportantItemDuplicates;
         properties.PbagItemShuffle = includePBagCavesInItemShuffle ?? GetIndeterminateFlagValue(r);
-        properties.StartWithSpellItems = removeSpellItems ?? GetIndeterminateFlagValue(r);
         properties.ShufflePbagXp = shufflePBagAmounts ?? GetIndeterminateFlagValue(r);
         properties.IncludeSpellsInShuffle = includeSpellsInShuffle ?? GetIndeterminateFlagValue(r);
-        properties.IncludeSwordTechsInShuffle = includeSwordTechsInShuffle ?? GetIndeterminateFlagValue(r);
+        properties.IncludeBagusNoteInShuffle = IncludeBagusNoteInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeQuestItemsInShuffle = includeQuestItemsInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeBagusNoteInShuffle = IncludeBagusNoteInShuffle ?? GetIndeterminateFlagValue(r);
 
