@@ -667,9 +667,12 @@ public class Hyrule
         }
 
         int mirrorIndex = 0, waterindex = 0;
-        if (props.IncludeQuestItemsInShuffle)
+        if (props.IncludeBagusNoteInShuffle)
         {
             shufflableItems.Add(Collectable.BAGUS_NOTE);
+        }
+        if (props.IncludeQuestItemsInShuffle)
+        {
             if (props.StartWithSpellItems)
             {
                 shufflableItems.Add(minorItems[r.Next(minorItems.Count)]);
@@ -2203,7 +2206,7 @@ public class Hyrule
         {
             itemLocs.Add(westHyrule.pbagCave);
         }
-        if (props.IncludeQuestItemsInShuffle)
+        if (props.IncludeBagusNoteInShuffle)
         {
             itemLocs.Add(westHyrule.bagu);
         }

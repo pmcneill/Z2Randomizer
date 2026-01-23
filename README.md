@@ -8,6 +8,7 @@ Download [nightly build here](https://nightly.link/initsu/Z2Randomizer/workflows
 
 ## Features
 - Add option to reveal Maze Island locations.
+- Split Bagu as an item location from other town quest items. (In case you think it's fun with the mirror & water shuffled, but not Bagu's Note.)
 
 ## Reporting bugs
 If there are any bugs in this version, please open an issue in this repo. Note that it is likely that this will be less maintained than the main version.

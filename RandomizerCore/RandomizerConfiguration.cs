@@ -371,6 +371,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     public bool blockingRoomsInAnyPalaceIncluded() => palaceStylesAreNotAllVanilla();
 
     [Reactive]
+    [ConditionallyIncludeInFlags]
     private PalaceDropStyle palaceDropStyle = PalaceDropStyle.ANY_EXIT;
     public bool palaceDropStyleIncluded() => palaceStylesAreNotAllVanilla();
 
@@ -596,6 +597,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
 
     [Reactive]
     private bool? includeQuestItemsInShuffle = false;
+
+    [Reactive]
+    private bool? includeBagusNoteInShuffle = false;
 
     //Drops
     [Reactive]
@@ -1403,9 +1407,10 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.PbagItemShuffle = includePBagCavesInItemShuffle ?? GetIndeterminateFlagValue(r);
         properties.StartWithSpellItems = removeSpellItems ?? GetIndeterminateFlagValue(r);
         properties.ShufflePbagXp = shufflePBagAmounts ?? GetIndeterminateFlagValue(r);
-        properties.IncludeQuestItemsInShuffle = includeQuestItemsInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeSpellsInShuffle = includeSpellsInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeSwordTechsInShuffle = includeSwordTechsInShuffle ?? GetIndeterminateFlagValue(r);
+        properties.IncludeQuestItemsInShuffle = includeQuestItemsInShuffle ?? GetIndeterminateFlagValue(r);
+        properties.IncludeBagusNoteInShuffle = IncludeBagusNoteInShuffle ?? GetIndeterminateFlagValue(r);
 
         //Drops
         properties.ShuffleItemDropFrequency = shuffleItemDropFrequency;
