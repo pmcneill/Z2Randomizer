@@ -37,6 +37,8 @@
                                               CommandParameter="{Binding Source={x:Static presets:FullShufflePreset.Preset}}"/>
                                     <MenuItem Header="Great Palace Ready Preset" Command="{Binding LoadPreset}"
                                               CommandParameter="{Binding Source={x:Static presets:GreatPalaceReadyPreset.Preset}}"/>
+                                    <MenuItem Header="Half-and-Half Vanilla Preset" Command="{Binding LoadPreset}"
+                                              CommandParameter="{Binding Source={x:Static presets:HalfAndHalfPreset.Preset}}"/>
                                     <MenuItem Header="Standard Tournament Swiss Preset" Command="{Binding LoadPreset}"
                                               CommandParameter="{Binding Source={x:Static presets:StandardSwissPreset.Preset}}"/>
                                     <MenuItem Header="Standard Tournament Brackets Preset" Command="{Binding LoadPreset}"

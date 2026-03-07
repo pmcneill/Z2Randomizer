@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -349,9 +351,17 @@ public class RandomizerProperties
 
     public bool HasEnoughSpaceToAllocateItems()
     {
+        int minorItemCount = 0;
         //The 3 pbag caves are either explicitly minor items or allowable as overflow locations
         //so they are counted either way.
-        int minorItemCount = 3;
+        if (WestBiome is not Biome.VANILLA_EVERYTHING)
+        {
+            minorItemCount += 1;
+        }
+        if (EastBiome is not Biome.VANILLA_EVERYTHING)
+        {
+            minorItemCount += 2;
+        }
 
         //more or less than 4 containers in the seed adds/removes minor items
         minorItemCount -= MaxHearts - StartHearts - 4;
@@ -361,42 +371,79 @@ public class RandomizerProperties
         minorItemCount += PalaceItemRoomCounts.Select(c => c - 1).Sum();
 
         //Start items add 1 to the count
-        minorItemCount += StartCandle ? 1 : 0;
-        minorItemCount += StartBoots ? 1 : 0;
-        minorItemCount += StartCross ? 1 : 0;
-        minorItemCount += StartFlute ? 1 : 0;
-        minorItemCount += StartGlove ? 1 : 0;
-        minorItemCount += StartHammer ? 1 : 0;
-        minorItemCount += StartKey ? 1 : 0;
-        minorItemCount += StartRaft ? 1 : 0;
-
-        if(IncludeSpellsInShuffle)
+        if (WestBiome is not Biome.VANILLA_EVERYTHING)
         {
-            minorItemCount += StartShield ? 1 : 0;
-            minorItemCount += StartJump ? 1 : 0;
-            minorItemCount += StartLife ? 1 : 0;
-            minorItemCount += StartFairy ? 1 : 0;
-            minorItemCount += StartFire ? 1 : 0;
-            minorItemCount += StartReflect ? 1 : 0;
-            minorItemCount += StartSpell ? 1 : 0;
-            minorItemCount += StartThunder ? 1 : 0;
+            minorItemCount += StartCandle ? 1 : 0;
+            minorItemCount += StartGlove ? 1 : 0;
+            minorItemCount += StartRaft ? 1 : 0;
+        }
+        if (DmBiome is not Biome.VANILLA_EVERYTHING)
+        {
+            minorItemCount += StartHammer ? 1 : 0;
+        }
+        if (EastBiome is not Biome.VANILLA_EVERYTHING)
+        {
+            minorItemCount += StartBoots ? 1 : 0;
+            minorItemCount += StartCross ? 1 : 0;
+            minorItemCount += StartFlute ? 1 : 0;
+            minorItemCount += StartKey ? 1 : 0;
+        }
+
+        if (IncludeSpellsInShuffle)
+        {
+            if (WestBiome is not Biome.VANILLA_EVERYTHING)
+            {
+                minorItemCount += StartShield ? 1 : 0;
+                minorItemCount += StartJump ? 1 : 0;
+                minorItemCount += StartLife ? 1 : 0;
+                minorItemCount += StartFairy ? 1 : 0;
+            }
+            if (EastBiome is not Biome.VANILLA_EVERYTHING)
+            {
+                minorItemCount += StartFire ? 1 : 0;
+                minorItemCount += StartReflect ? 1 : 0;
+                minorItemCount += StartSpell ? 1 : 0;
+                minorItemCount += StartThunder ? 1 : 0;
+            }
         }
 
         if(IncludeSwordTechsInShuffle)
         {
-            if (TownQuestLocationsAreMinorItems)
+            if (WestBiome is not Biome.VANILLA_EVERYTHING)
             {
-                minorItemCount -= 2;
+                if (TownQuestLocationsAreMinorItems) { minorItemCount--; }
+                minorItemCount += StartWithDownstab ? 1 : 0;
             }
-            minorItemCount += StartWithDownstab ? 1 : 0;
-            minorItemCount += StartWithUpstab ? 1 : 0;
+            if (EastBiome is not Biome.VANILLA_EVERYTHING)
+            {
+                if (TownQuestLocationsAreMinorItems) { minorItemCount--; }
+                minorItemCount += StartWithUpstab ? 1 : 0;
+            }
         }
 
-        if (IncludeQuestItemsInShuffle && TownQuestLocationsAreMinorItems)
+        if (IncludeQuestItemsInShuffle)
         {
-            minorItemCount -= 2;
+            if (WestBiome is not Biome.VANILLA_EVERYTHING)
+            {
+                if (TownQuestLocationsAreMinorItems) { minorItemCount--; }
+            }
+            if (EastBiome is not Biome.VANILLA_EVERYTHING)
+            {
+                if (TownQuestLocationsAreMinorItems) { minorItemCount--; }
+            }
         }
 
         return minorItemCount >= 0;
     }
+
+    internal bool IsVanillaEverythingPalace(int palaceIndex)
+    {
+        return palaceIndex switch
+        {
+            0 or 1 or 2 => WestBiome is Biome.VANILLA_EVERYTHING,
+            3 => MazeBiome is Biome.VANILLA_EVERYTHING,
+            4 or 5 or 6 => EastBiome is Biome.VANILLA_EVERYTHING,
+            _ => throw new ArgumentException("Invalid palace number"),
+        };
+}
 }

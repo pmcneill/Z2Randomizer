@@ -1009,6 +1009,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             Seed = seed
         };
 
+        //Set biomes first (so Vanilla Everything is known)
+        ExportBiome(properties, r);
+
         //Properties that can affect available minor item replacements
         do // while (!properties.HasEnoughSpaceToAllocateItems())
         {
@@ -1074,6 +1077,13 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
                 }
             }
 
+            for (int i = 0; i < 7; i++)
+            {
+                if (IsVanillaEverythingPalace(i))
+                {
+                    properties.PalaceStyles[i] = PalaceStyle.VANILLA;
+                }
+            }
 
             properties.PalaceLengths = Palaces.RollPalaceLengths(this, properties, r);
 
@@ -1264,134 +1274,6 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.DmSize = dmSize;
         properties.MazeSize = mazeSize;
         properties.BoulderBlockConnections = allowConnectionCavesToBeBlocked;
-        if (westBiome == Biome.RANDOM || westBiome == Biome.RANDOM_NO_VANILLA || westBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
-        {
-            int shuffleLimit = westBiome switch {
-                Biome.RANDOM => 7,
-                Biome.RANDOM_NO_VANILLA => 6,
-                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
-                _ => throw new ImpossibleException()
-            };
-            properties.WestBiome = r.Next(shuffleLimit) switch
-            {
-                0 => Biome.VANILLALIKE,
-                1 => Biome.ISLANDS,
-                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
-                3 => Biome.CALDERA,
-                4 => Biome.MOUNTAINOUS,
-                5 => Biome.VANILLA_SHUFFLE,
-                6 => Biome.VANILLA,
-                _ => throw new Exception("Invalid Biome")
-            };
-        }
-        else if (westBiome == Biome.RANDOM_CUSTOM)
-        {
-            var keys = Enum.GetValues<Biome>().Where(b => b.IsWestBiome() && biomeWeights.ContainsKey(b));
-            var westWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
-            var weightedRnd = new LinearWeightedRandom<Biome>(westWeights);
-            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one West biome must be included at above zero weight."); }
-            Biome b = weightedRnd.Next(r);
-            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
-            properties.WestBiome = b;
-        }
-        else if(westBiome == Biome.CANYON)
-        {
-            properties.WestBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
-        }
-        else {
-            properties.WestBiome = westBiome;
-        }
-        if (eastBiome == Biome.RANDOM || eastBiome == Biome.RANDOM_NO_VANILLA || eastBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
-        {
-            int shuffleLimit = eastBiome switch
-            {
-                Biome.RANDOM => 7, 
-                Biome.RANDOM_NO_VANILLA => 6, 
-                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
-                _ => throw new ImpossibleException()
-            };
-            properties.EastBiome = r.Next(shuffleLimit) switch
-            {
-                0 => Biome.VANILLALIKE,
-                1 => Biome.ISLANDS,
-                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
-                3 => Biome.VOLCANO,
-                4 => Biome.MOUNTAINOUS,
-                5 => Biome.VANILLA_SHUFFLE,
-                6 => Biome.VANILLA,
-                _ => throw new Exception("Invalid Biome")
-            };
-        }
-        else if (eastBiome == Biome.RANDOM_CUSTOM)
-        {
-            var keys = Enum.GetValues<Biome>().Where(b => b.IsEastBiome() && biomeWeights.ContainsKey(b));
-            var eastWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
-            var weightedRnd = new LinearWeightedRandom<Biome>(eastWeights);
-            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one East biome must be included at above zero weight."); }
-            Biome b = weightedRnd.Next(r);
-            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
-            properties.EastBiome = b;
-        }
-        else if (eastBiome == Biome.CANYON)
-        {
-            properties.EastBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
-        }
-        else
-        {
-            properties.EastBiome = eastBiome;
-        }
-        if (dmBiome == Biome.RANDOM || dmBiome == Biome.RANDOM_NO_VANILLA || dmBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
-        {
-            int shuffleLimit = dmBiome switch {
-                Biome.RANDOM => 7,
-                Biome.RANDOM_NO_VANILLA => 6,
-                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
-                _ => throw new ImpossibleException()
-            };
-            properties.DmBiome = r.Next(shuffleLimit) switch
-            {
-                0 => Biome.VANILLALIKE,
-                1 => Biome.ISLANDS,
-                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
-                3 => Biome.CALDERA,
-                4 => Biome.MOUNTAINOUS,
-                5 => Biome.VANILLA_SHUFFLE,
-                6 => Biome.VANILLA,
-                _ => throw new Exception("Invalid Biome")
-            };
-        }
-        else if (dmBiome == Biome.RANDOM_CUSTOM)
-        {
-            var keys = Enum.GetValues<Biome>().Where(b => b.IsDmBiome() && biomeWeights.ContainsKey(b));
-            var dmWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
-            var weightedRnd = new LinearWeightedRandom<Biome>(dmWeights);
-            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one Death Mountain biome must be included at above zero weight."); }
-            Biome b = weightedRnd.Next(r);
-            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
-            properties.DmBiome = b;
-        }
-        else if (dmBiome == Biome.CANYON)
-        {
-            properties.DmBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
-        }
-        else
-        {
-            properties.DmBiome = dmBiome;
-        }
-        if (mazeBiome == Biome.RANDOM || mazeBiome == Biome.RANDOM_CUSTOM)
-        {
-            properties.MazeBiome = r.Next(3) switch
-            {
-                0 => Biome.VANILLA,
-                1 => Biome.VANILLA_SHUFFLE,
-                2 => Biome.VANILLALIKE,
-                _ => throw new Exception("Invalid Biome")
-            };
-        }
-        else
-        {
-            properties.MazeBiome = mazeBiome;
-        }
 
         //climates
         if (westClimate == ClimateEnum.RANDOM)
@@ -1499,7 +1381,8 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             properties.AllowVanillaRooms = true;
         }
-        while (!(properties.AllowVanillaRooms || properties.AllowV4Rooms || properties.AllowV5_0Rooms)) {
+        while (!(properties.AllowVanillaRooms || properties.AllowV4Rooms || properties.AllowV5_0Rooms))
+        {
             properties.AllowVanillaRooms = includeVanillaRooms ?? GetIndeterminateFlagValue(r);
             properties.AllowV4Rooms = includev4_0Rooms ?? GetIndeterminateFlagValue(r);
             properties.AllowV5_0Rooms = includev5_0Rooms ?? GetIndeterminateFlagValue(r);
@@ -1595,6 +1478,36 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.IncludeBagusNoteInShuffle = IncludeBagusNoteInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeQuestItemsInShuffle = includeQuestItemsInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeBagusNoteInShuffle = IncludeBagusNoteInShuffle ?? GetIndeterminateFlagValue(r);
+
+        if (westBiome is Biome.VANILLA_EVERYTHING ||
+            dmBiome is Biome.VANILLA_EVERYTHING ||
+            eastBiome is Biome.VANILLA_EVERYTHING ||
+            mazeBiome is Biome.VANILLA_EVERYTHING)
+        {
+            // global
+            properties.FastItemPickup = false;
+        }
+
+        if (westBiome is Biome.VANILLA_EVERYTHING ||
+            eastBiome is Biome.VANILLA_EVERYTHING)
+        {
+            // town overrides
+            properties.ShuffleSpellLocations = false;
+        }
+        if (westBiome is Biome.VANILLA_EVERYTHING ||
+            eastBiome is Biome.VANILLA_EVERYTHING ||
+            mazeBiome is Biome.VANILLA_EVERYTHING)
+        {
+            // palace overrides
+            properties.BossItem = false;
+        }
+        if (eastBiome == Biome.VANILLA_EVERYTHING)
+        {
+            properties.HiddenPalace = true;
+            properties.HiddenKasuto = true;
+            properties.NewKasutoBasementRequirement = 7;
+        }
+
 
         //Drops
         properties.ShuffleItemDropFrequency = shuffleItemDropFrequency;
@@ -1759,7 +1672,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         }
 
         //if (eastBiome.SelectedIndex == 0 || (hiddenPalaceList.SelectedIndex == 0 && hideKasutoList.SelectedIndex == 0))
-        if (properties.EastBiome == Biome.VANILLA || properties is { HiddenPalace: false, HiddenKasuto: false })
+        if ((properties.EastBiome is Biome.VANILLA or Biome.VANILLA_EVERYTHING) || properties is { HiddenPalace: false, HiddenKasuto: false })
         {
             properties.ShuffleHidden = false;
         }
@@ -1798,6 +1711,141 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         return properties;
     }
 
+    private void ExportBiome(RandomizerProperties properties, Random r)
+    {
+        if (westBiome == Biome.RANDOM || westBiome == Biome.RANDOM_NO_VANILLA || westBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
+        {
+            int shuffleLimit = westBiome switch
+            {
+                Biome.RANDOM => 7,
+                Biome.RANDOM_NO_VANILLA => 6,
+                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
+                _ => throw new ImpossibleException()
+            };
+            properties.WestBiome = r.Next(shuffleLimit) switch
+            {
+                0 => Biome.VANILLALIKE,
+                1 => Biome.ISLANDS,
+                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
+                3 => Biome.CALDERA,
+                4 => Biome.MOUNTAINOUS,
+                5 => Biome.VANILLA_SHUFFLE,
+                6 => Biome.VANILLA,
+                _ => throw new Exception("Invalid Biome")
+            };
+        }
+        else if (westBiome == Biome.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<Biome>().Where(b => b.IsWestBiome() && biomeWeights.ContainsKey(b));
+            var westWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<Biome>(westWeights);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one West biome must be included at above zero weight."); }
+            Biome b = weightedRnd.Next(r);
+            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+            properties.WestBiome = b;
+        }
+        else if (westBiome == Biome.CANYON)
+        {
+            properties.WestBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
+        }
+        else
+        {
+            properties.WestBiome = westBiome;
+        }
+        if (eastBiome == Biome.RANDOM || eastBiome == Biome.RANDOM_NO_VANILLA || eastBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
+        {
+            int shuffleLimit = eastBiome switch
+            {
+                Biome.RANDOM => 7,
+                Biome.RANDOM_NO_VANILLA => 6,
+                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
+                _ => throw new ImpossibleException()
+            };
+            properties.EastBiome = r.Next(shuffleLimit) switch
+            {
+                0 => Biome.VANILLALIKE,
+                1 => Biome.ISLANDS,
+                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
+                3 => Biome.VOLCANO,
+                4 => Biome.MOUNTAINOUS,
+                5 => Biome.VANILLA_SHUFFLE,
+                6 => Biome.VANILLA,
+                _ => throw new Exception("Invalid Biome")
+            };
+        }
+        else if (eastBiome == Biome.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<Biome>().Where(b => b.IsEastBiome() && biomeWeights.ContainsKey(b));
+            var eastWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<Biome>(eastWeights);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one East biome must be included at above zero weight."); }
+            Biome b = weightedRnd.Next(r);
+            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+            properties.EastBiome = b;
+        }
+        else if (eastBiome == Biome.CANYON)
+        {
+            properties.EastBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
+        }
+        else
+        {
+            properties.EastBiome = eastBiome;
+        }
+        if (dmBiome == Biome.RANDOM || dmBiome == Biome.RANDOM_NO_VANILLA || dmBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
+        {
+            int shuffleLimit = dmBiome switch
+            {
+                Biome.RANDOM => 7,
+                Biome.RANDOM_NO_VANILLA => 6,
+                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
+                _ => throw new ImpossibleException()
+            };
+            properties.DmBiome = r.Next(shuffleLimit) switch
+            {
+                0 => Biome.VANILLALIKE,
+                1 => Biome.ISLANDS,
+                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
+                3 => Biome.CALDERA,
+                4 => Biome.MOUNTAINOUS,
+                5 => Biome.VANILLA_SHUFFLE,
+                6 => Biome.VANILLA,
+                _ => throw new Exception("Invalid Biome")
+            };
+        }
+        else if (dmBiome == Biome.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<Biome>().Where(b => b.IsDmBiome() && biomeWeights.ContainsKey(b));
+            var dmWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<Biome>(dmWeights);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one Death Mountain biome must be included at above zero weight."); }
+            Biome b = weightedRnd.Next(r);
+            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+            properties.DmBiome = b;
+        }
+        else if (dmBiome == Biome.CANYON)
+        {
+            properties.DmBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
+        }
+        else
+        {
+            properties.DmBiome = dmBiome;
+        }
+        if (mazeBiome == Biome.RANDOM || mazeBiome == Biome.RANDOM_CUSTOM)
+        {
+            properties.MazeBiome = r.Next(3) switch
+            {
+                0 => Biome.VANILLA,
+                1 => Biome.VANILLA_SHUFFLE,
+                2 => Biome.VANILLALIKE,
+                _ => throw new Exception("Invalid Biome")
+            };
+        }
+        else
+        {
+            properties.MazeBiome = mazeBiome;
+        }
+    }
+
     public void AssignPalaceItemCounts(RandomizerProperties properties, Random r)
     {
         //I'm not sure whether I like the bias introduced in generating random values and then capping them
@@ -1831,6 +1879,14 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             for (int i = 0; i < 6; i++)
             {
                 properties.PalaceItemRoomCounts[i] = int.Max(properties.PalaceItemRoomCounts[i], 1);
+            }
+        }
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (IsVanillaEverythingPalace(i))
+            {
+                properties.PalaceItemRoomCounts[i] = 1;
             }
         }
 
@@ -2022,7 +2078,24 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
 
     private int CountPossibleMinorItems()
     {
-        int count = 3, hardStartItemsCount = 0;
+        int count = 0, hardStartItemsCount = 0;
+        int mustExistHearts = 0;
+        if (westBiome is not Biome.VANILLA_EVERYTHING)
+        {
+            count += 1;
+        }
+        else
+        {
+            mustExistHearts += 2;
+        }
+        if (eastBiome is not Biome.VANILLA_EVERYTHING)
+        {
+            count += 2;
+        }
+        else
+        {
+            mustExistHearts += 2;
+        }
 
         hardStartItemsCount += shuffleStartingItems || startWithCandle ? 1 : 0;
         hardStartItemsCount += shuffleStartingItems || startWithBoots ? 1 : 0;
@@ -2081,6 +2154,11 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             _ => throw new Exception("Unrecognized Max Hearts in CountPossibleMinorItems")
         };
 
+        if (heartContainerReplacementSmallItemsCount < mustExistHearts)
+        {
+            throw new UserFacingException("Heart Container Mismatch", "Vanilla Everything West and East must each have contains their vanilla 2 Heart Containers, but starting hearts configuration does not allow this.");
+        }
+
         count += heartContainerReplacementSmallItemsCount;
 
         count += 4 - (8 - (startingMagicContainersMax ?? 8));
@@ -2107,6 +2185,17 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             return (int)darkLinkMinDistance;
         }
+    }
+
+    internal bool IsVanillaEverythingPalace(int palaceIndex)
+    {
+        return palaceIndex switch
+        {
+            0 or 1 or 2 => westBiome is Biome.VANILLA_EVERYTHING,
+            3 => mazeBiome is Biome.VANILLA_EVERYTHING,
+            4 or 5 or 6 => eastBiome is Biome.VANILLA_EVERYTHING,
+            _ => throw new ArgumentException("Invalid palace number"),
+        };
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

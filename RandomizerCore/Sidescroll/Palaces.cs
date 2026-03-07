@@ -168,8 +168,10 @@ public class Palaces
         int[] sizes = [.. VANILLA_LENGTHS];
 
         // Full + Vanilla (Shuffled) palaces should not change length
-        bool ShouldRollForNormalPalace(int i) => conf.NormalPalaceLength != PalaceLengthOption.FULL || !props.PalaceStyles[i].UsesVanillaRoomPool();
-        bool ShouldRollForGP() => conf.GpLength != PalaceLengthOption.FULL || !props.PalaceStyles[6].UsesVanillaRoomPool();
+        bool ShouldRollForNormalPalace(int i) => !conf.IsVanillaEverythingPalace(i) &&
+            (conf.NormalPalaceLength != PalaceLengthOption.FULL || !props.PalaceStyles[i].UsesVanillaRoomPool());
+        bool ShouldRollForGP() => !conf.IsVanillaEverythingPalace(6) &&
+            (conf.GpLength != PalaceLengthOption.FULL || !props.PalaceStyles[6].UsesVanillaRoomPool());
         // Helper functions that makes sure that Vanilla palace lengths are
         // within the range that `Shorten()` can deliver.
         int LowerLimit(int i) => props.PalaceStyles[i].UsesVanillaRoomPool() ? VANILLA_MIN_PALACE_LENGTHS[i] : 2;

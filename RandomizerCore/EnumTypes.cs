@@ -339,6 +339,8 @@ public enum Biome
     VANILLA,
     [Description("Vanilla Shuffle"), CanHaveWeight]
     VANILLA_SHUFFLE,
+    [Description("Vanilla Everything")]
+    VANILLA_EVERYTHING,
     [Description("Vanilla Like"), CanHaveWeight]
     VANILLALIKE,
     [Description("Islands"), CanHaveWeight]
@@ -370,6 +372,7 @@ static class BiomeExtensions
         return biome switch
         {
             Biome.VANILLA => 300,
+            Biome.VANILLA_EVERYTHING => 300,
             Biome.VANILLA_SHUFFLE => 300,
             Biome.VANILLALIKE => 300,
             Biome.ISLANDS => 220,
@@ -387,6 +390,7 @@ static class BiomeExtensions
         return biome switch
         {
             Biome.VANILLA => true,
+            Biome.VANILLA_EVERYTHING => true,
             Biome.VANILLA_SHUFFLE => true,
             _ => false
         };
@@ -397,6 +401,7 @@ static class BiomeExtensions
         return biome switch
         {
             Biome.VANILLA => true,
+            Biome.VANILLA_EVERYTHING => true,
             Biome.VANILLA_SHUFFLE => true,
             Biome.VANILLALIKE => true,
             Biome.ISLANDS => true,
@@ -416,6 +421,7 @@ static class BiomeExtensions
         return biome switch
         {
             Biome.VANILLA => true,
+            Biome.VANILLA_EVERYTHING => true,
             Biome.VANILLA_SHUFFLE => true,
             Biome.VANILLALIKE => true,
             Biome.ISLANDS => true,
@@ -435,6 +441,7 @@ static class BiomeExtensions
         return biome switch
         {
             Biome.VANILLA => true,
+            Biome.VANILLA_EVERYTHING => true,
             Biome.VANILLA_SHUFFLE => true,
             Biome.VANILLALIKE => true,
             Biome.ISLANDS => true,
@@ -454,6 +461,7 @@ static class BiomeExtensions
         return biome switch
         {
             Biome.VANILLA => true,
+            Biome.VANILLA_EVERYTHING => true,
             Biome.VANILLA_SHUFFLE => true,
             Biome.VANILLALIKE => true,
             Biome.RANDOM => true,

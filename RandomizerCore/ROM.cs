@@ -2863,9 +2863,9 @@ ElevatorBossFix:
 
     public void SetEncounterRate(Assembler asm, RandomizerProperties props, Random r)
     {
-        var westEncounterRate = props.EncounterRates;
-        var eastEncounterRate = props.EncounterRates;
-        var dmEncounterRate = props.EncounterRates;
+        var westEncounterRate = props.WestBiome is Biome.VANILLA_EVERYTHING ? EncounterRate.NORMAL : props.EncounterRates;
+        var eastEncounterRate = props.EastBiome is Biome.VANILLA_EVERYTHING ? EncounterRate.NORMAL : props.EncounterRates;
+        var dmEncounterRate = props.DmBiome is Biome.VANILLA_EVERYTHING ? EncounterRate.NORMAL : props.EncounterRates;
         var mazeEncounterRate = props.MazeRevealLocations ? EncounterRate.NONE : props.EncounterRates;
         List<EncounterRate> encounterRates = [westEncounterRate, dmEncounterRate, eastEncounterRate, mazeEncounterRate];
         List<EncounterRate> randomCandidates = Enums.GetShufflableList<EncounterRate>();
