@@ -360,7 +360,8 @@ public class Hyrule
                 ROMData.Put(0x186d, 0xEA);
             }
 
-            ShortenWizards();
+            ShortenWizardsWest();
+            ShortenWizardsEast();
 
             firstProcessOverworldTimestamp = DateTime.Now;
             await ProcessOverworld(progress, ct);
@@ -1502,46 +1503,63 @@ public class Hyrule
     /// <summary>
     /// Removes the intermediate room between entering the spell house and reaching the old man's basement
     /// </summary>
-    private void ShortenWizards()
+    private void ShortenWizardsWest()
     {
-        /*
-        Spell swap notes:
-        Shield exit: 0xC7BB, 0xC1; enter: 0xC7EC, 0x90 //change map 48 pointer to map 40 pointer
-        Jump exit: 0xC7BF, 0xC5; enter: 0xC7F0, 0x94 //change map 49 pointer to map 41 pointer
-        Life exit: 0xC7C3, 0xC9; enter 0xC7F4, 0x98 //change map 50 pointer to map 42 pointer
-        Fairy exit: 0xC7C7, 0xCD; enter 0xC7F8, 0x9C //change map 51 pointer to map 43 pointer
-        Fire exit: 0xC7Cb, 0xD1; enter 0xC7FC, 0xA0 //change map 52 pointer to map 44 pointer
-        Reflect exit: 0xC7Cf, 0xD5; enter 0xC800, 0xA4 //change map 53 pointer to map 45 pointer
-        Spell exit: 0xC7D3, 0x6A; enter 0xC795, 0xC796, 0x4D //new kasuto item?
-        Thunder exit: 0xC7D7, 0xDD; enter 0xC808, 0xAC
-        Downstab exit: 0xC7DB, 0xE1; enter 0xC80C, 0xB0
-        Upstab exit: 0xC7DF, 0xE5; enter 0xC810, 0xB4
-        */
-        for (int i = 0; i < 16; i = i + 2)
+        // Make maps 48 - 51 sideviews & enemies all point to the same data
+        // Essentially making the inside house map into copies of the basements
+        for (int i = 0; i < 8; i = i + 2)
         {
             ROMData.Put(0xC611 + i, (byte)0x75);
             ROMData.Put(0xC611 + i + 1, (byte)0x70);
             ROMData.Put(0xC593 + i, (byte)0x48);
             ROMData.Put(0xC593 + i + 1, (byte)0x9B);
         }
+
+        // Shield exit:   0xC7BB, 0xC1; enter: 0xC7EC, 0x90 //change map 48 pointer to map 40 pointer
         ROMData.Put(0xC7BB, (byte)0x07);
+        // Jump exit:     0xC7BF, 0xC5; enter: 0xC7F0, 0x94 //change map 49 pointer to map 41 pointer
         ROMData.Put(0xC7BF, (byte)0x13);
+        // Life exit:     0xC7C3, 0xC9; enter: 0xC7F4, 0x98 //change map 50 pointer to map 42 pointer
         ROMData.Put(0xC7C3, (byte)0x21);
+        // Fairy exit:    0xC7C7, 0xCD; enter: 0xC7F8, 0x9C //change map 51 pointer to map 43 pointer
         ROMData.Put(0xC7C7, (byte)0x27);
-        ROMData.Put(0xC7CB, (byte)0x37);
-        ROMData.Put(0xC7CF, (byte)0x3F);
+        // Make downstab door go to basement directly
         ROMData.Put(0xC850, (byte)0xB0);
-        //ROMData.put(0xC7D3, (byte)0x4D);
-        ROMData.Put(0xC7D7, (byte)0x5E);
-        ROMData.Put(0xC7DF, (byte)0x43);
-        ROMData.Put(0xC870, (byte)0xB8);
-        ROMData.Put(0xC7E3, (byte)0x49);
-        ROMData.Put(0xC874, (byte)0xA8);
-        ROMData.Put(0xC7D3, (byte)0x4D);
+        // Downstab exit: 0xC7DB, 0xE1; enter 0xC80C, 0xB0
         ROMData.Put(0xC7DB, (byte)0x29);
-        //ROMData.put(0xC7E3, (byte)0x49);
-        // ROMData.put(0xC874, (byte)0xA8);
-        //ROMData.put(0x8560, (byte)0xBC);
+    }
+
+    private void ShortenWizardsEast()
+    {
+        // Make maps 52 - 55 sideviews & enemies all point to basement data
+        for (int i = 8; i < 16; i = i + 2)
+        {
+            ROMData.Put(0xC611 + i, (byte)0x75);
+            ROMData.Put(0xC611 + i + 1, (byte)0x70);
+            ROMData.Put(0xC593 + i, (byte)0x48);
+            ROMData.Put(0xC593 + i + 1, (byte)0x9B);
+        }
+        // Fire exit:     0xC7Cb, 0xD1; enter: 0xC7FC, 0xA0 //change map 52 pointer to map 44 pointer
+        // Exit to Nabooru (middle map, page 3)
+        ROMData.Put(0xC7CB, (byte)0x37);
+        // Reflect exit:  0xC7Cf, 0xD5; enter 0xC800, 0xA4 //change map 53 pointer to map 45 pointer
+        // Exit to Darunia (left map, page 3)
+        ROMData.Put(0xC7CF, (byte)0x3F);
+        // Upstab exit:   0xC7DF, 0xE5; enter 0xC810, 0xB4
+        // Exit to Darunia (middle map, page 3)
+        ROMData.Put(0xC7DF, (byte)0x43);
+        // Spell exit:    0xC7D3, 0x6A; enter 0xC795, 0xC796, 0x4D //new kasuto item?
+        // Go straight to Grandma's basement map
+        ROMData.Put(0xC870, (byte)0xB8);
+        // Go straight to Spell basement (from New Kasuto, middle map, page 1 door)
+        ROMData.Put(0xC874, (byte)0xA8);
+        // Exit to New Kasuto (middle map, page 1)
+        ROMData.Put(0xC7D3, (byte)0x4D);
+        // Exit to New Kasuto (left map, page 1) from Grandma's basement
+        ROMData.Put(0xC7E3, (byte)0x49);
+        // Thunder exit:  0xC7D7, 0xDD; enter 0xC808, 0xAC
+        // Exit to Old Kasuto (right map, page 2)
+        ROMData.Put(0xC7D7, (byte)0x5E);
     }
 
     /// <summary>
