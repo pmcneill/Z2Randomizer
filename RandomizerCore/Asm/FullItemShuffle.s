@@ -500,8 +500,8 @@ ItemTileTable:
     .byte $72, $F5 ; Experience Bag - 100 pts
     .byte $72, $F5 ; Experience Bag - 200 pts
     .byte $72, $F5 ; Experience Bag - 500 pts
-    .byte $83, $83 ; Magic Container
-    .byte $81, $81 ; Heart Container
+    .byte $fd, $fd ; Magic Container
+    .byte $d9, $d9 ; Heart Container
     .byte $8A, $F5 ; Blue Jar
     .byte $8A, $F5 ; Red Jar
     .byte $A8, $F5 ; Link Doll
@@ -551,3 +551,6 @@ ItemPaletteTable:
     .byte $01 ; Spell Spell
     .byte $01 ; Thunder Spell
     .byte $01 ; Dash Spell
+
+
+.export ItemTileTable

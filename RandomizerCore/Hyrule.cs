@@ -2475,6 +2475,7 @@ public class Hyrule
         }
 
         // Copy heart and magic container sprite tiles to the new location.
+        /*
         for (int i = 0; i < 64; i++)
         {
             byte heartByte = ROMData.GetByte(ROM.ChrRomOffset + 0x7800 + i);
@@ -2486,6 +2487,7 @@ public class Hyrule
             ROMData.Put(ROM.ChrRomOffset + 0x17800 + i, heartByte);
             ROMData.Put(ROM.ChrRomOffset + 0x19800 + i, heartByte);
         }
+        */
 
         foreach (Palace palace in palaces)
         {
@@ -3684,7 +3686,7 @@ bank5_Pointer_table_for_End_Credits:
         rom.AllowForChangingElevatorYPosition(engine);
         rom.InstantText(engine);
         rom.ChangeLavaKillPosition(engine);
-        rom.FixItemPickup(engine);
+        rom.FixItemPickup(engine, props.FastItemPickup);
         rom.FixMinibossGlitchyAppearance(engine);
         rom.FixBossKillPaletteGlitch(engine);
         rom.FixBigBubbleSplit(engine, randomizedStats);

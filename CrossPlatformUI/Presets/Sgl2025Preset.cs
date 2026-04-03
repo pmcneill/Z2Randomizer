@@ -121,6 +121,7 @@ public static class Sgl2025Preset
         ShufflePBagAmounts = false,
         PalacesContainExtraKeys = false,
         RandomizeNewKasutoJarRequirements = false,
+        FastItemPickup = true,
         AllowImportantItemDuplicates = false,
 
         //Drops

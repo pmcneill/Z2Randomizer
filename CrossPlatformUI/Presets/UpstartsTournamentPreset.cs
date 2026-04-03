@@ -112,6 +112,7 @@ public static class UpstartsTournamentPreset
         ShufflePBagAmounts = true,
         PalacesContainExtraKeys = false,
         RandomizeNewKasutoJarRequirements = true,
+        FastItemPickup = true,
         AllowImportantItemDuplicates = false,
 
         //Drops

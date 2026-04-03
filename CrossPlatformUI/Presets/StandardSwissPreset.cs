@@ -118,6 +118,7 @@ public static class StandardSwissPreset
         ShufflePBagAmounts = false,
         PalacesContainExtraKeys = false,
         RandomizeNewKasutoJarRequirements = true,
+        FastItemPickup = true,
         AllowImportantItemDuplicates = false,
 
         //Drops

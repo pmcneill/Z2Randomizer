@@ -118,6 +118,7 @@ public static class StandardPreset
         ShufflePBagAmounts = false,
         PalacesContainExtraKeys = false,
         RandomizeNewKasutoJarRequirements = true,
+        FastItemPickup = true,
         AllowImportantItemDuplicates = false,
 
         //Drops

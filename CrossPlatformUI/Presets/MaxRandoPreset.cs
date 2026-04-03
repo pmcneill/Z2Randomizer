@@ -119,6 +119,7 @@ public static class MaxRandoPreset
         ShufflePBagAmounts = true,
         PalacesContainExtraKeys = false,
         RandomizeNewKasutoJarRequirements = true,
+        FastItemPickup = true,
         AllowImportantItemDuplicates = false,
 
         //Drops
