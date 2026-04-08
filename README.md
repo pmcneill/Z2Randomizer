@@ -1,19 +1,13 @@
-# Z2Randomizer
-Fork of the Zelda 2 Randomizer by Digshake ([Twitch](https://www.twitch.tv/digshake)\).
-Currently maintained by Ellendar ([Twitch](https://www.twitch.tv/ellendar)\).
+# Zelda 2 Randomizer Extras
+Fork of [Zelda 2 Randomizer Community Fork](https://github.com/Ellendar/Z2Randomizer)
 
-Original source is at https://bitbucket.org/digshake/z2randomizer/src/master/
+This fork contains a few features and tweaks added on top of the main tournament build (linked above).
 
-[Download](https://github.com/Ellendar/Z2Randomizer/releases/download/5.1.4/Z2Randomizer-5.1.4-Windows-Installer.msi) - Download the latest version.
+## Download
+Download [nightly build here](https://nightly.link/initsu/Z2Randomizer/workflows/build-latest.yaml/extras). 
 
-[Discord](https://discord.com/invite/BsK47Nsrde) - Questions? Requests? Memes? Come visit our discord server.
+## Features
 
-[FAQ](https://github.com/Ellendar/Z2Randomizer/blob/main/FAQ.md) - Check out the FAQ for this update.
 
-[Options](https://github.com/Ellendar/Z2Randomizer/wiki/Flags-Reference) - What do all these flags mean? Detailed descriptions are available here.
-
-[Changelog](https://github.com/Ellendar/Z2Randomizer/blob/main/PatchNotes.md) - See a list of the most recent updates.
-
-[Report A Bug](https://github.com/Ellendar/Z2Randomizer/issues/new) - Let us know about a problem.
-
-[Thanks](https://github.com/Ellendar/Z2Randomizer/blob/main/Thanks.md) - These people helped make the randomizer possible...
+## Reporting bugs
+If there are any bugs in this version, please open an issue in this repo. Note that it is likely that this will be less maintained than the main version.
