@@ -263,7 +263,35 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private Biome mazeBiome = Biome.VANILLA;
 
     [Reactive]
-    private ImmutableDictionary<Biome, int> biomeWeights = new Dictionary<Biome, int>().ToImmutableDictionary();
+    [ConditionallyIncludeInFlags]
+    private ImmutableDictionary<Biome, int> biomeWeights = biomeWeightsDefault();
+    public bool biomeWeightsIncluded()
+    {
+        foreach (var biome in (List<Biome>)[westBiome, eastBiome, dmBiome, mazeBiome])
+        {
+            switch (biome)
+            {
+                case Biome.RANDOM_CUSTOM:
+                    return true;
+            }
+        }
+        return false;
+    }
+    public static ImmutableDictionary<Biome, int> biomeWeightsDefault()
+    {
+        var builder = ImmutableDictionary.CreateBuilder<Biome, int>();
+
+        foreach (var enumValue in Enum.GetValues<Biome>().Where(b => b.CanHaveWeight()))
+        {
+            builder.Add(enumValue, enumValue switch
+            {
+                Biome.VANILLA => 0,
+                Biome.VANILLA_SHUFFLE => 0,
+                _ => 1,
+            });
+        }
+        return builder.ToImmutableDictionary();
+    }
 
     [Reactive]
     private ClimateEnum westClimate = ClimateEnum.VANILLA_WEIGHTED;
@@ -276,6 +304,37 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
 
     [Reactive]
     [ConditionallyIncludeInFlags]
+    private ImmutableDictionary<ClimateEnum, int> climateWeights = climateWeightsDefault();
+    public bool climateWeightsIncluded()
+    {
+        foreach (var biome in (List<ClimateEnum>)[westClimate, eastClimate, dmClimate])
+        {
+            switch (biome)
+            {
+                case ClimateEnum.RANDOM_CUSTOM:
+                    return true;
+            }
+        }
+        return false;
+    }
+    public static ImmutableDictionary<ClimateEnum, int> climateWeightsDefault()
+    {
+        var builder = ImmutableDictionary.CreateBuilder<ClimateEnum, int>();
+
+        foreach (var enumValue in Enum.GetValues<ClimateEnum>().Where(b => b.CanHaveWeight()))
+        {
+            builder.Add(enumValue, enumValue switch
+            {
+                ClimateEnum.CHAOS => 0,
+                ClimateEnum.WETLANDS => 0,
+                _ => 1,
+            });
+        }
+        return builder.ToImmutableDictionary();
+    }
+
+    [Reactive]
+    [ConditionallyIncludeInFlags]
     private bool legacyVanillaShuffledLocations = false;
     public bool legacyVanillaShuffledLocationsIncluded() {
         foreach (var biome in (List<Biome>)[westBiome, eastBiome, dmBiome, mazeBiome])
@@ -284,9 +343,15 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             {
                 case Biome.VANILLA_SHUFFLE:
                 case Biome.RANDOM:
-                case Biome.RANDOM_NO_VANILLA: /* still includes shuffle */
+                case Biome.RANDOM_NO_VANILLA:
                     return true;
+                case Biome.RANDOM_CUSTOM:
+                    if (biomeWeights.GetValueOrDefault(Biome.VANILLA_SHUFFLE) > 0)
+                    {
+                        return true;
             }
+                    continue;
+        }
         }
         return false;
     }
@@ -300,6 +365,24 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
 
     [Reactive]
     private PalaceStyle gpStyle = PalaceStyle.VANILLA;
+
+    [Reactive]
+    [ConditionallyIncludeInFlags]
+    private ImmutableDictionary<PalaceStyle, int> palaceStyleWeights = palaceStyleWeightsDefault();
+    public bool palaceStyleWeightsIncluded() => palaceStylesAnyMetastyleSelected();
+    public static ImmutableDictionary<PalaceStyle, int> palaceStyleWeightsDefault()
+    {
+        var builder = ImmutableDictionary.CreateBuilder<PalaceStyle, int>();
+        foreach (var enumValue in Enum.GetValues<PalaceStyle>().Where(b => b.CanHaveWeight()))
+        {
+            builder.Add(enumValue, enumValue switch
+            {
+                PalaceStyle.CHAOS => 0,
+                _ => 1,
+            });
+        }
+        return builder.ToImmutableDictionary();
+    }
 
     private bool palaceStylesAreNotAllVanilla()
     {
@@ -348,11 +431,6 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         }
         return false;
     }
-
-    [Reactive]
-    [ConditionallyIncludeInFlags]
-    private bool randomStylesAllowVanilla = false;
-    public bool randomStylesAllowVanillaIncluded() => palaceStylesAnyMetastyleSelected();
 
     [Reactive]
     [ConditionallyIncludeInFlags]
@@ -948,47 +1026,47 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             {
                 Debug.Assert(GpStyle == PalaceStyle.RANDOM);
                 allowedPalaceStyles = [.. Enums.GetShufflableList<PalaceStyle>().Where(i => i.IsGpStyle())];
-                if (!randomStylesAllowVanilla)
-                {
-                    allowedPalaceStyles.RemoveAll(i => i.UsesVanillaRoomPool());
+                var weightedList = allowedPalaceStyles.Select(k => (k, palaceStyleWeights.GetValueOrDefault(k, 0))).ToList();
+                var weightedRnd = new LinearWeightedRandom<PalaceStyle>(weightedList);
+                if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Palace Style Weights", "At least one style must be included at above zero weight."); }
+                properties.PalaceStyles[6] = weightedRnd.Next(r);
                 }
-            }
             else
             {
-                allowedPalaceStyles = [GpStyle];
+                properties.PalaceStyles[6] = GpStyle;
             }
-            properties.PalaceStyles[6] = allowedPalaceStyles.Sample(r);
             Debug.Assert(!properties.PalaceStyles[6].IsMetastyle());
 
             if (NormalPalaceStyle.IsMetastyle())
             {
                 Debug.Assert(NormalPalaceStyle == PalaceStyle.RANDOM_PER_PALACE || NormalPalaceStyle == PalaceStyle.RANDOM_ALL);
                 allowedPalaceStyles = [.. Enums.GetShufflableList<PalaceStyle>().Where(i => i.NormalPalaceStyle())];
-                if (!randomStylesAllowVanilla)
+                var weightedList = allowedPalaceStyles.Select(k => (k, palaceStyleWeights.GetValueOrDefault(k, 0))).ToList();
+                var weightedRnd = new LinearWeightedRandom<PalaceStyle>(weightedList);
+                if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Palace Style Weights", "At least one style must be included at above zero weight."); }
+                if (NormalPalaceStyle == PalaceStyle.RANDOM_PER_PALACE)
                 {
-                    allowedPalaceStyles.RemoveAll(i => i.UsesVanillaRoomPool());
+                    for (int i = 0; i < 6; i++)
+                    {
+                        properties.PalaceStyles[i] = weightedRnd.Next(r);
                 }
             }
-            else
+                else if (NormalPalaceStyle == PalaceStyle.RANDOM_ALL)
             {
-                allowedPalaceStyles = [NormalPalaceStyle];
-            }
-            PalaceStyle singlePalaceStyle = allowedPalaceStyles.Sample(r);
+                    PalaceStyle style = weightedRnd.Next(r);
             for (int i = 0; i < 6; i++)
             {
-                if (normalPalaceStyle == PalaceStyle.RANDOM_PER_PALACE)
-                {
-                    properties.PalaceStyles[i] = allowedPalaceStyles.Sample(r);
+                        properties.PalaceStyles[i] = style;
                 }
-                else if (normalPalaceStyle == PalaceStyle.RANDOM_ALL)
-                {
-                    properties.PalaceStyles[i] = singlePalaceStyle;
                 }
+            }
                 else
                 {
-                    properties.PalaceStyles[i] = normalPalaceStyle;
+                Debug.Assert(!NormalPalaceStyle.IsMetastyle());
+                for (int i = 0; i < 6; i++)
+                {
+                    properties.PalaceStyles[i] = NormalPalaceStyle;
                 }
-                Debug.Assert(!properties.PalaceStyles[i].IsMetastyle());
             }
 
 
@@ -1201,6 +1279,16 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
                 _ => throw new Exception("Invalid Biome")
             };
         }
+        else if (westBiome == Biome.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<Biome>().Where(b => b.IsWestBiome() && biomeWeights.ContainsKey(b));
+            var westWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<Biome>(westWeights);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one West biome must be included at above zero weight."); }
+            Biome b = weightedRnd.Next(r);
+            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+            properties.WestBiome = b;
+        }
         else if(westBiome == Biome.CANYON)
         {
             properties.WestBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
@@ -1210,7 +1298,8 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         }
         if (eastBiome == Biome.RANDOM || eastBiome == Biome.RANDOM_NO_VANILLA || eastBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
         {
-            int shuffleLimit = eastBiome switch { 
+            int shuffleLimit = eastBiome switch
+            {
                 Biome.RANDOM => 7, 
                 Biome.RANDOM_NO_VANILLA => 6, 
                 Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
@@ -1227,6 +1316,16 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
                 6 => Biome.VANILLA,
                 _ => throw new Exception("Invalid Biome")
             };
+        }
+        else if (eastBiome == Biome.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<Biome>().Where(b => b.IsEastBiome() && biomeWeights.ContainsKey(b));
+            var eastWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<Biome>(eastWeights);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one East biome must be included at above zero weight."); }
+            Biome b = weightedRnd.Next(r);
+            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+            properties.EastBiome = b;
         }
         else if (eastBiome == Biome.CANYON)
         {
@@ -1256,6 +1355,16 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
                 _ => throw new Exception("Invalid Biome")
             };
         }
+        else if (dmBiome == Biome.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<Biome>().Where(b => b.IsDmBiome() && biomeWeights.ContainsKey(b));
+            var dmWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<Biome>(dmWeights);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one Death Mountain biome must be included at above zero weight."); }
+            Biome b = weightedRnd.Next(r);
+            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+            properties.DmBiome = b;
+        }
         else if (dmBiome == Biome.CANYON)
         {
             properties.DmBiome = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON;
@@ -1264,7 +1373,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             properties.DmBiome = dmBiome;
         }
-        if (mazeBiome == Biome.RANDOM)
+        if (mazeBiome == Biome.RANDOM || mazeBiome == Biome.RANDOM_CUSTOM)
         {
             properties.MazeBiome = r.Next(3) switch
             {
@@ -1285,6 +1394,14 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             List<ClimateEnum> westClimates = Enums.GetShufflableList<ClimateEnum>().Where(i => i.IsWestClimate() && !i.IsMetastyle()).ToList();
             properties.WestClimate = westClimates.Sample(r);
         }
+        else if (westClimate == ClimateEnum.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<ClimateEnum>().Where(c => c.IsWestClimate() && climateWeights.ContainsKey(c));
+            var weightsList = keys.Select(k => (k, climateWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<ClimateEnum>(weightsList);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Climate Weights", "At least one West climate must be included at above zero weight."); }
+            properties.WestClimate = weightedRnd.Next(r);
+        }
         else
         {
             properties.WestClimate = westClimate;
@@ -1295,6 +1412,14 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             List<ClimateEnum> eastClimates = Enums.GetShufflableList<ClimateEnum>().Where(i => i.IsEastClimate() && !i.IsMetastyle()).ToList();
             properties.EastClimate = eastClimates.Sample(r);
         }
+        else if (eastClimate == ClimateEnum.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<ClimateEnum>().Where(c => c.IsEastClimate() && climateWeights.ContainsKey(c));
+            var weightsList = keys.Select(k => (k, climateWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<ClimateEnum>(weightsList);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Climate Weights", "At least one East climate must be included at above zero weight."); }
+            properties.EastClimate = weightedRnd.Next(r);
+        }
         else
         {
             properties.EastClimate = eastClimate;
@@ -1304,6 +1429,14 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             List<ClimateEnum> dmClimates = Enums.GetShufflableList<ClimateEnum>().Where(i => i.IsDmClimate() && !i.IsMetastyle()).ToList();
             properties.DmClimate = dmClimates.Sample(r);
+        }
+        else if (dmClimate == ClimateEnum.RANDOM_CUSTOM)
+        {
+            var keys = Enum.GetValues<ClimateEnum>().Where(c => c.IsDmClimate() && climateWeights.ContainsKey(c));
+            var weightsList = keys.Select(k => (k, climateWeights[k])).ToList();
+            var weightedRnd = new LinearWeightedRandom<ClimateEnum>(weightsList);
+            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Climate Weights", "At least one Death Mountain climate must be included at above zero weight."); }
+            properties.DmClimate = weightedRnd.Next(r);
         }
         else
         {

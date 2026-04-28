@@ -12,10 +12,10 @@ public class PalacesViewModel : ReactiveObject, IActivatableViewModel
     public ViewModelActivator Activator { get; }
     public MainViewModel Main { get; }
 
+    public IObservable<bool> PalaceStyleWeightsIncludedObservable { get; }
     public IObservable<bool> BossRoomsExitTypeIncludedObservable { get; }
     public IObservable<bool> NoDuplicateRoomsByLayoutIncludedObservable { get; }
     public IObservable<bool> NoDuplicateRoomsByEnemiesIncludedObservable { get; }
-    public IObservable<bool> RandomStylesAllowVanillaIncludedObservable { get; }
     public IObservable<bool> RemoveLongDeadEndsIncludedObservable { get; }
     public IObservable<bool> IncludeVanillaRoomsIncludedObservable { get; }
     public IObservable<bool> Includev4_0RoomsIncludedObservable { get; }
@@ -30,6 +30,10 @@ public class PalacesViewModel : ReactiveObject, IActivatableViewModel
         Main = main;
         Activator = new();
 
+        PalaceStyleWeightsIncludedObservable = Main.FlagsChanged
+            .Select(_ => Main.Config.palaceStyleWeightsIncluded())
+            .DistinctUntilChanged();
+
         BossRoomsExitTypeIncludedObservable = Main.FlagsChanged
             .Select(_ => Main.Config.bossRoomsExitTypeIncluded())
             .DistinctUntilChanged();
@@ -40,10 +44,6 @@ public class PalacesViewModel : ReactiveObject, IActivatableViewModel
 
         NoDuplicateRoomsByEnemiesIncludedObservable = Main.FlagsChanged
             .Select(_ => Main.Config.noDuplicateRoomsByEnemiesIncluded())
-            .DistinctUntilChanged();
-
-        RandomStylesAllowVanillaIncludedObservable = Main.FlagsChanged
-            .Select(_ => Main.Config.randomStylesAllowVanillaIncluded())
             .DistinctUntilChanged();
 
         RemoveLongDeadEndsIncludedObservable = Main.FlagsChanged

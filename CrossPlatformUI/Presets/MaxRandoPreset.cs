@@ -47,7 +47,7 @@ public static class MaxRandoPreset
         //Palaces
         NormalPalaceStyle = PalaceStyle.RANDOM_PER_PALACE,
         GpStyle = PalaceStyle.RANDOM,
-        RandomStylesAllowVanilla = false,
+        PalaceStyleWeights = RandomizerConfiguration.palaceStyleWeightsDefault().SetItem(PalaceStyle.VANILLA, 0).SetItem(PalaceStyle.SHUFFLED, 0),
         NormalPalaceLength = PalaceLengthOption.RANDOM,
         GpLength = PalaceLengthOption.RANDOM,
         IncludeVanillaRooms = true,

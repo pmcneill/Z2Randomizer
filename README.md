@@ -7,6 +7,7 @@ This fork contains a few features and tweaks added on top of the main tournament
 Download [nightly build here](https://nightly.link/initsu/Z2Randomizer/workflows/build-latest.yaml/extras). 
 
 ## Features
+- Added sliders to fine-tune weights for palace styles, biomes and climates when they are set to Random. Weight values are 0 to 3. A 0 means the option is taken out of the pool. A 3 means it's 3 times as likely to appear as 1, etc.
 - Add option to reveal Maze Island locations.
 - Split Bagu as an item location from other town quest items. (In case you think it's fun with the mirror & water shuffled, but not Bagu's Note.)
 - Add an option to replace shuffled town quest item locations with minor items (including the table in Saria, the fountain in Nabooru, and the down & upstab guys). This is meant to reduce the need to spend time going into towns, and favor overworld and palace exploration.

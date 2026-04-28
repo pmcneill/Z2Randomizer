@@ -239,23 +239,23 @@ public enum SwordImmunityOption
 [DefaultValue(VANILLA)]
 public enum PalaceStyle
 {
-    [Description("Vanilla"), DefaultWeight(10)]
+    [Description("Vanilla"), CanHaveWeight]
     VANILLA,
-    [Description("Vanilla Shuffle"), DefaultWeight(10)]
+    [Description("Vanilla Shuffle"), CanHaveWeight]
     SHUFFLED,
-    [Description("Sequential"), DefaultWeight(10)]
+    [Description("Sequential"), CanHaveWeight]
     SEQUENTIAL,
-    [Description("Random Walk"), DefaultWeight(10)]
+    [Description("Random Walk"), CanHaveWeight]
     RANDOM_WALK,
-    [Description("Vanilla-Weighted"), DefaultWeight(10)]
+    [Description("Vanilla-Weighted"), CanHaveWeight]
     VANILLA_WEIGHTED,
-    [Description("Tower"), DefaultWeight(10)]
+    [Description("Tower"), CanHaveWeight]
     TOWER,
-    [Description("Reconstructed"), DefaultWeight(10)]
+    [Description("Reconstructed"), CanHaveWeight]
     RECONSTRUCTED,
-    [Description("Loopy"), DefaultWeight(0)]
+    [Description("Loopy"), CanHaveWeight]
     RECONSTRUCTED_LOOPY,
-    [Description("Chaos"), DefaultWeight(0)]
+    [Description("Chaos"), CanHaveWeight, DefaultWeight(0)]
     CHAOS,
     [Description("Random"), Metastyle]
     RANDOM,
@@ -335,30 +335,32 @@ public enum BossRoomsExitType
 [DefaultValue(VANILLA)]
 public enum Biome
 {
-    [Description("Vanilla")]
+    [Description("Vanilla"), CanHaveWeight]
     VANILLA,
-    [Description("Vanilla Shuffle")]
+    [Description("Vanilla Shuffle"), CanHaveWeight]
     VANILLA_SHUFFLE,
-    [Description("Vanilla Like")]
+    [Description("Vanilla Like"), CanHaveWeight]
     VANILLALIKE,
-    [Description("Islands")]
+    [Description("Islands"), CanHaveWeight]
     ISLANDS,
-    [Description("Canyon")]
+    [Description("Canyon"), CanHaveWeight]
     CANYON,
     [Description("Dry Canyon")]
     DRY_CANYON,
-    [Description("Mountainous")]
+    [Description("Mountainous"), CanHaveWeight]
     MOUNTAINOUS,
-    [Description("Volcano")]
+    [Description("Volcano"), CanHaveWeight]
     VOLCANO,
-    [Description("Caldera")]
+    [Description("Caldera"), CanHaveWeight]
     CALDERA,
     [Description("Random (No Vanilla or Shuffle)"), Metastyle]
     RANDOM_NO_VANILLA_OR_SHUFFLE,
     [Description("Random (No Vanilla)"), Metastyle]
     RANDOM_NO_VANILLA,
     [Description("Random"), Metastyle]
-    RANDOM
+    RANDOM,
+    [Description("Random (Custom)"), Metastyle]
+    RANDOM_CUSTOM,
 }
 
 static class BiomeExtensions
@@ -404,6 +406,7 @@ static class BiomeExtensions
             Biome.RANDOM => true,
             Biome.RANDOM_NO_VANILLA => true,
             Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => true,
+            Biome.RANDOM_CUSTOM => true,
             _ => false
         };
     }
@@ -422,11 +425,12 @@ static class BiomeExtensions
             Biome.RANDOM => true,
             Biome.RANDOM_NO_VANILLA => true,
             Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => true,
+            Biome.RANDOM_CUSTOM => true,
             _ => false
         };
     }
 
-    public static bool IsDMBiome(this Biome biome)
+    public static bool IsDmBiome(this Biome biome)
     {
         return biome switch
         {
@@ -440,6 +444,7 @@ static class BiomeExtensions
             Biome.RANDOM => true,
             Biome.RANDOM_NO_VANILLA => true,
             Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => true,
+            Biome.RANDOM_CUSTOM => true,
             _ => false
         };
     }
@@ -452,6 +457,7 @@ static class BiomeExtensions
             Biome.VANILLA_SHUFFLE => true,
             Biome.VANILLALIKE => true,
             Biome.RANDOM => true,
+            Biome.RANDOM_CUSTOM => true,
             _ => false
         };
     }
@@ -460,20 +466,22 @@ static class BiomeExtensions
 [DefaultValue(CLASSIC)]
 public enum ClimateEnum
 {
-    [Description("Classic"), DefaultWeight(1)]
+    [Description("Classic"), CanHaveWeight]
     CLASSIC,
-    [Description("Vanilla-Weighted"), DefaultWeight(1)]
+    [Description("Vanilla-Weighted"), CanHaveWeight]
     VANILLA_WEIGHTED,
-    [Description("Chaos"), DefaultWeight(1)]
+    [Description("Chaos"), CanHaveWeight]
     CHAOS,
-    [Description("Wetlands"), DefaultWeight(0)]
+    [Description("Wetlands"), CanHaveWeight, DefaultWeight(0)]
     WETLANDS,
-    [Description("Great Lakes"), DefaultWeight(1)]
+    [Description("Great Lakes"), CanHaveWeight]
     GREAT_LAKES,
-    [Description("Scrubland"), DefaultWeight(1)]
+    [Description("Scrubland"), CanHaveWeight]
     SCRUBLAND,
     [Description("Random"), Metastyle]
-    RANDOM
+    RANDOM,
+    [Description("Random (Custom)"), Metastyle]
+    RANDOM_CUSTOM,
 }
 
 static class ClimateExtensions
@@ -1024,7 +1032,7 @@ public static class Enums
 
     public static IEnumerable<EnumDescription> WestBiomeList { get; } = ToDescriptions<Biome>(i => i.IsWestBiome());
     public static IEnumerable<EnumDescription> EastBiomeList { get; } = ToDescriptions<Biome>(i => i.IsEastBiome());
-    public static IEnumerable<EnumDescription> DMBiomeList { get; } = ToDescriptions<Biome>(i => i.IsDMBiome());
+    public static IEnumerable<EnumDescription> DMBiomeList { get; } = ToDescriptions<Biome>(i => i.IsDmBiome());
     public static IEnumerable<EnumDescription> MazeBiomeList { get; } = ToDescriptions<Biome>(i => i.IsMazeBiome());
     public static IEnumerable<EnumDescription> WestClimateList { get; } = ToDescriptions<ClimateEnum>(i => i.IsWestClimate());
     public static IEnumerable<EnumDescription> EastClimateList { get; } = ToDescriptions<ClimateEnum>(i => i.IsEastClimate());

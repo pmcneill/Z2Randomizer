@@ -46,7 +46,6 @@ public static class RandomPercentPreset
         //Palaces
         NormalPalaceStyle = PalaceStyle.RANDOM_PER_PALACE,
         GpStyle = PalaceStyle.RANDOM,
-        RandomStylesAllowVanilla = true,
         NormalPalaceLength = PalaceLengthOption.RANDOM,
         GpLength = PalaceLengthOption.RANDOM,
         IncludeVanillaRooms = null,

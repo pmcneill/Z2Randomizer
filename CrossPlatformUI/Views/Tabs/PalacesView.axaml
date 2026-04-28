@@ -132,13 +132,6 @@
         <Grid Grid.Row="1" Margin="0 16 0 0" ColumnDefinitions="*, *, *">
             <StackPanel Grid.Column="0" Margin="0 0">
                 <!-- general behavior -->
-                <CheckBox IsChecked="{Binding Main.Config.RandomStylesAllowVanilla}"
-                          Name="RandomStylesAllowVanillaCheckbox"
-                          IsThreeState="False"
-                          IsEnabled="{Binding RandomStylesAllowVanillaIncludedObservable^}"
-                          Content="Random Styles Allow Vanilla">
-                    <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.RandomAllowsVanillaTooltip}"/></ToolTip.Tip>
-                </CheckBox>
 
                 <CheckBox IsChecked="{Binding Main.Config.NoDuplicateRoomsByLayout}"
                           Name="NoDuplicateRoomsByLayoutCheckbox"
@@ -171,6 +164,11 @@
                           Content="Reduce Dripper Variance">
                     <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.ReduceDripperVarianceToolTip}"/></ToolTip.Tip>
                 </CheckBox>
+
+                <views:WeightedEnumSelection EnumType="{x:Type rc:PalaceStyle}"
+                                             Weights="{Binding Main.Config.PalaceStyleWeights}"
+                                             IsVisible="{Binding PalaceStyleWeightsIncludedObservable^}"
+                                             Heading="Custom Palace Style Weights" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Margin="0 0">

@@ -13,6 +13,8 @@ public class BiomesViewModel : ReactiveObject, IActivatableViewModel
     public MainViewModel Main { get; }
 
     public IObservable<bool> LegacyVanillaShuffledLocationsIncludedObservable { get; }
+    public IObservable<bool> BiomeWeightsIsIncludedObservable { get; }
+    public IObservable<bool> ClimateWeightsIsIncludedObservable { get; }
 
     public BiomesViewModel(MainViewModel main)
     {
@@ -21,6 +23,14 @@ public class BiomesViewModel : ReactiveObject, IActivatableViewModel
 
         LegacyVanillaShuffledLocationsIncludedObservable = Main.FlagsChanged
             .Select(_ => Main.Config.legacyVanillaShuffledLocationsIncluded())
+            .DistinctUntilChanged();
+
+        BiomeWeightsIsIncludedObservable = Main.FlagsChanged
+            .Select(_ => Main.Config.biomeWeightsIncluded())
+            .DistinctUntilChanged();
+
+        ClimateWeightsIsIncludedObservable = Main.FlagsChanged
+            .Select(_ => Main.Config.climateWeightsIncluded())
             .DistinctUntilChanged();
 
         this.WhenActivated(OnActivate);
