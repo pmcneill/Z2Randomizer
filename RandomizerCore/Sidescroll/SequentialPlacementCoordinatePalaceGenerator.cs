@@ -37,6 +37,7 @@ public class SequentialPlacementCoordinatePalaceGenerator : CoordinatePalaceGene
         openCoords = new();
         Dictionary<RoomExitType, List<Room>> roomsByExitType;
         roomPool = new(rooms);
+        if (props.NoDuplicateRoomsBySideview && AllowDuplicatePrevention(props, palaceNumber)) { roomPool.DetermineRoomVariants(r); }
         // var palaceGroup = Util.AsPalaceGrouping(palaceNumber);
         Room entrance = new(roomPool.Entrances[r.Next(roomPool.Entrances.Count)])
         {
@@ -174,60 +175,55 @@ public class SequentialPlacementCoordinatePalaceGenerator : CoordinatePalaceGene
                 }
                 roomsByExitType.TryGetValue(exitType, out var possibleStubs);
 
-                bool placed = false;
-                do //while (placed == false)
+                Room? newRoom = possibleStubs?.Sample(r);
+                if (newRoom == null)
                 {
-                    Room? newRoom = possibleStubs?.Sample(r);
-                    if (newRoom == null)
-                    {
-                        roomPool.DefaultStubsByDirection.TryGetValue(exitType, out newRoom);
-                    }
-                    //This should no longer be possible since default stubs aren't removable
-                    if (newRoom == null)
-                    {
-                        palace.IsValid = false;
-                        return palace;
-                    }
+                    roomPool.DefaultStubsByDirection.TryGetValue(exitType, out newRoom);
+                }
+                //This should no longer be possible since default stubs aren't removable
+                if (newRoom == null)
+                {
+                    palace.IsValid = false;
+                    return palace;
+                }
 
-                    newRoom = new(newRoom);
-                    //If the stub is a drop zone, pretend it isn't, otherwise junctions can appear
-                    //as a result of adding the stub.
-                    if (newRoom.IsDropZone)
-                    {
-                        newRoom.IsDropZone = false;
-                    }
-                    newRoom.coords = openCoord;
-                    roomsByCoordinate.Add(newRoom.coords, newRoom);
-                    palace.AllRooms.Add(newRoom);
-                    openCoords.Remove(openCoord);
-                    placed = true;
+                newRoom = new(newRoom);
+                //If the stub is a drop zone, pretend it isn't, otherwise junctions can appear
+                //as a result of adding the stub.
+                if (newRoom.IsDropZone)
+                {
+                    newRoom.IsDropZone = false;
+                }
+                newRoom.coords = openCoord;
+                roomsByCoordinate.Add(newRoom.coords, newRoom);
+                palace.AllRooms.Add(newRoom);
+                openCoords.Remove(openCoord);
 
-                    if (left != null && newRoom.HasLeftExit)
-                    {
-                        newRoom.Left = left;
-                        left.Right = newRoom;
-                    }
-                    if (down != null && newRoom.HasDownExit)
-                    {
-                        newRoom.Down = down;
-                        down.Up = newRoom;
-                    }
-                    if (up != null && newRoom.HasUpExit)
-                    {
-                        newRoom.Up = up;
-                        up.Down = newRoom;
-                    }
-                    if (right != null && newRoom.HasRightExit)
-                    {
-                        newRoom.Right = right;
-                        right.Left = newRoom;
-                    }
+                if (left != null && newRoom.HasLeftExit)
+                {
+                    newRoom.Left = left;
+                    left.Right = newRoom;
+                }
+                if (down != null && newRoom.HasDownExit)
+                {
+                    newRoom.Down = down;
+                    down.Up = newRoom;
+                }
+                if (up != null && newRoom.HasUpExit)
+                {
+                    newRoom.Up = up;
+                    up.Down = newRoom;
+                }
+                if (right != null && newRoom.HasRightExit)
+                {
+                    newRoom.Right = right;
+                    right.Left = newRoom;
+                }
 
-                    if (newRoom.Group != RoomGroup.STUBS)
-                    {
-                        if (duplicateProtection) { roomPool.RemoveDuplicates(props, newRoom); }
-                    }
-                } while (placed == false);
+                if (newRoom.Group != RoomGroup.STUBS)
+                {
+                    if (duplicateProtection) { roomPool.RemoveDuplicates(props, newRoom); }
+                }
             }
         }
         //Debug.WriteLine(palace.GetLayoutDebug(PalaceStyle.SEQUENTIAL, false));

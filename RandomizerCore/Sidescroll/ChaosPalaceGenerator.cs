@@ -18,6 +18,7 @@ internal class ChaosPalaceGenerator : PalaceGenerator
         debug++;
         bool duplicateProtection = (props.NoDuplicateRooms || props.NoDuplicateRoomsBySideview) && AllowDuplicatePrevention(props, palaceNumber);
         RoomPool roomPool = new(rooms);
+        if (props.NoDuplicateRoomsBySideview && AllowDuplicatePrevention(props, palaceNumber)) { roomPool.DetermineRoomVariants(r); }
         Palace palace = new(palaceNumber);
         var palaceGroup = Util.AsPalaceGrouping(palaceNumber);
 

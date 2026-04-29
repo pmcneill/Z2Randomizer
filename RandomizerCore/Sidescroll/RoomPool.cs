@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -20,6 +20,7 @@ public class RoomPool
     public Dictionary<RoomExitType, Room> DefaultStubsByDirection { get; protected set; } = [];
     public Room DefaultUpEntrance { get; protected set; } = null!;
     public Room DefaultDownBossRoom { get; protected set; } = null!;
+    private ILookup<string, Room>? DuplicateGroupLookup { get; set; }
 
     protected RoomPool() { }
 
@@ -370,6 +371,33 @@ public class RoomPool
             value.Add(room);
         }
         return categorizedRooms;
+    }
+
+    /// When full duplicate protection is enabled, we remove all
+    /// but one rooms of each duplicate group at random.
+    ///
+    /// This should be called for the first time by the palace generator
+    /// before it removes any rooms.
+    public void DetermineRoomVariants(Random r)
+    {
+        if (DuplicateGroupLookup == null)
+        {
+            DuplicateGroupLookup = NormalRooms
+                .Where(room => room.DuplicateGroup != null && room.DuplicateGroup != "")
+                .ToLookup(room => room.DuplicateGroup);
+        }
+        HashSet<Room> toRemove = new();
+        foreach (var group in DuplicateGroupLookup)
+        {
+            // randomly pick one room from the duplicate group to keep
+            int keepIndex = r.Next(group.Count());
+            Room keep = group.ElementAt(keepIndex);
+            foreach (var room in group)
+            {
+                if (!ReferenceEquals(room, keep)) { toRemove.Add(room); }
+            }
+        }
+        NormalRooms.RemoveAll(toRemove.Contains);
     }
 
     RoomExitType GetMergedExitType(Room room)

@@ -18,6 +18,7 @@ public abstract class ShapeFirstCoordinatePalaceGenerator() : CoordinatePalaceGe
         bool duplicateProtection = (props.NoDuplicateRooms || props.NoDuplicateRoomsBySideview) && AllowDuplicatePrevention(props, palaceNumber);
         Palace palace = new(palaceNumber);
         RoomPool roomPool = new(rooms);
+        if (props.NoDuplicateRoomsBySideview && AllowDuplicatePrevention(props, palaceNumber)) { roomPool.DetermineRoomVariants(r); }
         var itemRoomSelector = GetItemRoomSelectionStrategy();
         // var palaceGroup = Util.AsPalaceGrouping(palaceNumber);
 
@@ -102,6 +103,7 @@ public abstract class ShapeFirstCoordinatePalaceGenerator() : CoordinatePalaceGe
                 {
                     logger.Debug($"Shape-first palace ran out of rooms of exit type: {roomExitType} in palace {palaceNumber}. Starting to use duplicate rooms.");
                     roomPool.RefillNormalRoomsForExitType(rooms, roomExitType);
+                    if (props.NoDuplicateRoomsBySideview && AllowDuplicatePrevention(props, palaceNumber)) { roomPool.DetermineRoomVariants(r); }
                     roomCandidates = roomPool.GetNormalRoomsForExitType(roomExitType, true);
                     Debug.Assert(roomCandidates.Count() > 0);
                 }

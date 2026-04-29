@@ -33,6 +33,7 @@ public class ReconstructedPalaceGenerator(CancellationToken ct) : PalaceGenerato
         {
             await Task.Yield();
             RoomPool roomPool = new(rooms);
+            if (props.NoDuplicateRoomsBySideview && AllowDuplicatePrevention(props, palaceNumber)) { roomPool.DetermineRoomVariants(r); }
             if (ct.IsCancellationRequested)
             {
                 palace.IsValid = false;
