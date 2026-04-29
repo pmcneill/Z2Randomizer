@@ -284,6 +284,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         return false;
     }
 
+    [Reactive]
+    public bool mazeRevealLocations;
+
     //Palaces
     [Reactive]
     private PalaceStyle normalPalaceStyle = PalaceStyle.VANILLA;
@@ -1242,6 +1245,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             properties.DmClimate = dmClimate;
         }
 
+        properties.MazeRevealLocations = mazeRevealLocations;
         properties.LegacyVanillaShuffledLocations = legacyVanillaShuffledLocations;
         properties.ShuffleHidden = shuffleWhichLocationIsHidden ?? GetIndeterminateFlagValue(r);
         properties.CanWalkOnWaterWithBoots = goodBoots ?? GetIndeterminateFlagValue(r);

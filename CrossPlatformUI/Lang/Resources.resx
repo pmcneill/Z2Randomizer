@@ -557,6 +557,9 @@ Pick one of the above at random.</value>
 water will be on water paths marked with a road tile on either end.
 This flag has no effect on the Vanilla or Vanilla(shuffle) biomes.</value>
 	</data>
+	<data name="MazeRevealLocationsToolTip" xml:space="preserve">
+<value>If enabled, hidden locations in the maze will show up as desert tiles.</value>
+	</data>
 	<data name="GenerateThreeEyedRockToolTip" xml:space="preserve">
 <value>If enabled, one palace will be hidden beneath Three-Eyed Rock and will require the flute
 to access. Look for the same rock formation as in the vanilla game.

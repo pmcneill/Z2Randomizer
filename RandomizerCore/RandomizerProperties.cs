@@ -104,6 +104,7 @@ public class RandomizerProperties
     public bool SaneCaves { get; set; }
     public RiverDevilBlockerOption RiverDevilBlockerOption { get; set; }
     public bool EastRocks { get; set; }
+    public bool MazeRevealLocations { get; set; } = true;
 
     //Palaces
     [NotMapped]

@@ -2708,7 +2708,11 @@ ElevatorBossFix:
 
     public void SetEncounterRate(Assembler asm, RandomizerProperties props, Random r)
     {
-        List<EncounterRate> encounterRates = [props.EncounterRates, props.EncounterRates, props.EncounterRates, props.EncounterRates];
+        var westEncounterRate = props.EncounterRates;
+        var eastEncounterRate = props.EncounterRates;
+        var dmEncounterRate = props.EncounterRates;
+        var mazeEncounterRate = props.MazeRevealLocations ? EncounterRate.NONE : props.EncounterRates;
+        List<EncounterRate> encounterRates = [westEncounterRate, dmEncounterRate, eastEncounterRate, mazeEncounterRate];
         List<EncounterRate> randomCandidates = Enums.GetShufflableList<EncounterRate>();
         encounterRates = [.. encounterRates.Select(val => val is EncounterRate.RANDOM ? randomCandidates.Sample(r) : val)];
 

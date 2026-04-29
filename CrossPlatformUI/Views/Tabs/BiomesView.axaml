@@ -137,9 +137,13 @@
                           Content="All Water Is Walkable With Boots">
                     <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.AllWaterIsWalkableWithBootsToolTip}"/></ToolTip.Tip>
                 </CheckBox>
+
+                <CheckBox IsChecked="{Binding Main.Config.MazeRevealLocations}"
+                          Content="Reveal Maze Island Locations">
+                    <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.MazeRevealLocationsToolTip}"/></ToolTip.Tip>
+                </CheckBox>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Margin="0 0">
                 <CheckBox IsThreeState="False"
                           IsEnabled="{Binding LegacyVanillaShuffledLocationsIncludedObservable^}"
                           IsChecked="{Binding Main.Config.LegacyVanillaShuffledLocations}"

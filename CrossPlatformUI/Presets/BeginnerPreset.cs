@@ -49,6 +49,7 @@ public static class BeginnerPreset
         EastClimate = ClimateEnum.VANILLA_WEIGHTED,
         DmClimate = ClimateEnum.CLASSIC,
         ContinentConnectionType = ContinentConnectionType.NORMAL,
+        MazeRevealLocations = true,
 
         //Palaces
         NormalPalaceStyle = PalaceStyle.VANILLA_WEIGHTED,
