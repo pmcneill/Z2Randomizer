@@ -176,6 +176,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private int startingLifeLevel = 1;
 
     [Reactive]
+    private StartingLocation startingLocation = StartingLocation.NORTH_PALACE;
+
+    [Reactive]
     private IndeterminateOptionRate indeterminateOptionRate = IndeterminateOptionRate.HALF;
 
     //Overworld
@@ -885,6 +888,16 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             ShuffleStartingCollectables(POSSIBLE_STARTING_ITEMS, startItemsLimit, shuffleStartingItems, properties, r);
             ShuffleStartingCollectables(POSSIBLE_STARTING_SPELLS, startSpellsLimit, shuffleStartingSpells, properties, r);
 
+            // Give North Palace its chance to roll now. Other Random cases are rolled later.
+            if (startingLocation.IsMetastyle() && r.Next(9) == 0)
+            {
+                properties.StartingLocation = StartingLocation.NORTH_PALACE;
+            }
+            else
+            {
+                properties.StartingLocation = startingLocation;
+            }
+
             List<PalaceStyle> allowedPalaceStyles;
             if(GpStyle.IsMetastyle())
             {
@@ -1099,6 +1112,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.StartAtk = startingAttackLevel;
         properties.StartingMagicLevel = startingMagicLevel;
         properties.StartLifeLvl = startingLifeLevel;
+        properties.StartingLocation = startingLocation;
 
         //Overworld
         properties.ShuffleEncounters = shuffleEncounters ?? GetIndeterminateFlagValue(r);

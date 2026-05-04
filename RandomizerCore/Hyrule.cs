@@ -130,6 +130,7 @@ public class Hyrule
     public List<World> worlds;
     public List<Palace> palaces;
     public List<Room> rooms;
+    private Location? startLocation;
     public StatRandomizer randomizedStats;
     public DropRandomizer randomizedDrops;
 
@@ -445,7 +446,7 @@ public class Hyrule
             }
 
             UpdateProgress(progress, ProgressEnum.APPLYING_PATCHES);
-            ApplyAsmPatches(props, assembler, r, texts, ROMData, randomizedStats);
+            ApplyAsmPatches(props, assembler, r, texts, ROMData, randomizedStats, startLocation!);
 
             UpdateProgress(progress, ProgressEnum.LINKING_ASSEMBLY);
             var rom = await ROMData.ApplyAsm(assembler);
@@ -1974,10 +1975,9 @@ public class Hyrule
                     mazeIsland.ResetVisitabilityState();
                     deathMountain.ResetVisitabilityState();
 
-                    //There was a spooky extra call to LoadItemLocs that used to be here that shouldn't be needed, but be aware.
-                    westHyrule.SetStart();
-
                     ShufflePalaces();
+                    DetermineStartingLocation();
+
                     LoadItemLocs(props.PalaceItemRoomCounts);
                     ShuffleItems();
 
@@ -2130,12 +2130,50 @@ public class Hyrule
             pals.Add(eastHyrule.locationAtGP);
         }
 
+        if (props.StartingLocation is StartingLocation.GREAT_PALACE)
+        {
+            var gpLocation = pals.FirstOrDefault(loc => loc.PalaceNumber == 7);
+            if (gpLocation != null)
+            {
+                var westPalaces = pals.Where(loc => loc.Continent is Continent.WEST).ToList();
+                if (westPalaces.Count > 0)
+                {
+                    var gpSwapLocation = westPalaces[r.Next(westPalaces.Count)];
+                    pals.Remove(gpSwapLocation);
+                    Util.Swap(gpLocation, gpSwapLocation);
+                }
+            }
+        }
+
         for (int i = pals.Count - 1; i > 0; i--)
         {
             int swap = r.Next(i + 1);
             Util.Swap(pals[i], pals[swap]);
         }
+    }
 
+    private void DetermineStartingLocation()
+    {
+        List<Location> westPalaces = [westHyrule.locationAtPalace1, westHyrule.locationAtPalace2, westHyrule.locationAtPalace3];
+        List<Location> westTowns = [westHyrule.locationAtRauru, westHyrule.locationAtRuto, westHyrule.locationAtSariaNorth, westHyrule.locationAtMido];
+        List<Location> westAllEligible = [
+            .. westTowns,
+            .. westPalaces,
+            westHyrule.kingsTomb,
+        ];
+
+        startLocation = props.StartingLocation switch
+        {
+            // this relies on code in ShufflePalace making sure GP is in the west (if possible)
+            StartingLocation.GREAT_PALACE => westPalaces.FirstOrDefault(loc => loc.PalaceNumber == 7)
+                ?? throw new UserFacingException("Impossible Start Location", "Great Palace can not be in the West with the current settings."),
+            StartingLocation.REGULAR_PALACE => westPalaces.Where(loc => loc.PalaceNumber != 4 && loc.PalaceNumber != 7).ToArray().Sample(r),
+            StartingLocation.RANDOM => westAllEligible.Sample(r),
+            StartingLocation.NORTH_PALACE => westHyrule.northPalace,
+            _ => throw new NotImplementedException()
+        };
+
+        GetWorld(startLocation!).SetStart(startLocation!);
     }
 
     //ItemLocs is specifically only those locations that contain shufflable items
@@ -3669,13 +3707,14 @@ bank5_Pointer_table_for_End_Credits:
         a.Code(Util.ReadResource("Z2Randomizer.RandomizerCore.Asm.MMC5.s"), "mmc5_conversion.s");
     }
 
-    private void ApplyAsmPatches(RandomizerProperties props, Assembler engine, Random r, List<Text> texts, ROM rom, StatRandomizer randomizedStats)
+    private void ApplyAsmPatches(RandomizerProperties props, Assembler engine, Random r, List<Text> texts, ROM rom, StatRandomizer randomizedStats, Location startingLocation)
     {
         bool randomizeMusic = !props.DisableMusic && props.RandomizeMusic;
 
         ChangeMapperToMMC5(engine, props.DisableHUDLag, randomizeMusic); // will make output vary with customize tab options
         rom.AddRandomizerToTitle(engine);
         AddCropGuideBoxesToFileSelect(engine);
+        rom.SetStartingLocation(engine, startingLocation, palaces);
         rom.SetEncounterRate(engine, props, r);
         FixHelmetheadBossRoom(engine);
         FullItemShuffle(engine, GetNonSideviewItemLocations());
@@ -3848,5 +3887,22 @@ bank5_Pointer_table_for_End_Credits:
             return eastHyrule.townAtOldKasuto;
         }
         throw new Exception("Unrecognized town in GetTownLocation, was this extended to non-standard wizards?");
+    }
+
+    private World GetWorld(Location location)
+    {
+        switch (location.Continent)
+        {
+            case Continent.WEST:
+                return westHyrule;
+            case Continent.DM:
+                return deathMountain;
+            case Continent.EAST:
+                return eastHyrule;
+            case Continent.MAZE:
+                return mazeIsland;
+            default:
+                throw new Exception($"Location {location} is on unknown continent");
+}
     }
 }

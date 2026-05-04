@@ -127,6 +127,7 @@ public abstract class World
     public List<Location> AllLocations { get; }
     public List<Location> RemovedLocations { get; }
     public Dictionary<Terrain, List<Location>> Locations { get; set; }
+    protected Location? startLocation { get; set; }
 
     public bool AllReached { get; set; }
 
@@ -316,7 +317,7 @@ public abstract class World
         }
     }
 
-    protected Location GetLocation(LocationID lid)
+    public Location GetLocation(LocationID lid)
     {
         return AllLocations.FirstOrDefault(i => i.ID == lid)
             ?? throw new Exception($"Failed to find Location with ID {lid}");
@@ -2881,6 +2882,13 @@ public abstract class World
     }
     */
 
+    public void SetStart(Location start)
+    {
+        visitation[start.Y, start.Xpos] = true;
+        start.Reachable = true;
+        startLocation = start;
+    }
+
     //Short term fix, right now linked locations aren't shuffled, and they are counted as reachable when
     //their parent location is reachable, but the original location remains in the location list, creating
     //a phantom reachability spot at the vanilla location.
@@ -2903,6 +2911,10 @@ public abstract class World
     /// </summary>
     public virtual void UpdateVisit(IReadOnlySet<RequirementType> requireables)
     {
+        if (startLocation != null)
+        {
+            visitation[startLocation.Y, startLocation.Xpos] = true;
+        }
         UpdateReachable(requireables);
 
         foreach (Location location in AllLocations)

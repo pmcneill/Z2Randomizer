@@ -41,15 +41,18 @@
             >
                 <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.StartingItemLimitToolTip}"/></ToolTip.Tip>
             </ComboBox>
-			<ComboBox
-	            assists:ComboBoxAssist.Label="Random Flag Rate" Theme="{StaticResource MaterialOutlineComboBox}"
-	            ItemsSource="{Binding Source={x:Static rc:Enums.IndeterminateOptionRateList}}"
-	            SelectedItem="{Binding Config.IndeterminateOptionRate, Converter={x:Static ui:Util.EnumConvert}}"
-            >
-				<ToolTip.Tip>
-					<TextBlock Text="{x:Static lang:Resources.RandomFlagRateToolTip}"/>
-				</ToolTip.Tip>
-			</ComboBox>
+            <ComboBox Theme="{StaticResource MaterialOutlineComboBox}"
+                      ItemsSource="{Binding Source={x:Static rc:Enums.IndeterminateOptionRateList}}"
+                      SelectedItem="{Binding Config.IndeterminateOptionRate, Converter={x:Static ui:Util.EnumConvert}}"
+                      assists:ComboBoxAssist.Label="Random Flag Rate">
+                <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.RandomFlagRateToolTip}"/></ToolTip.Tip>
+            </ComboBox>
+            <ComboBox Theme="{StaticResource MaterialOutlineComboBox}"
+                      ItemsSource="{Binding Source={x:Static rc:Enums.StartingLocationList}}"
+                      SelectedItem="{Binding Config.StartingLocation, Converter={x:Static ui:Util.EnumConvert}}"
+                      assists:ComboBoxAssist.Label="Starting Location">
+                <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.StartingLocationToolTip}"/></ToolTip.Tip>
+            </ComboBox>
         </StackPanel>
         <StackPanel Grid.Column="1">
             <CheckBox
@@ -73,12 +76,12 @@
                     <CheckBox IsChecked="{Binding Config.StartWithThunder}" Content="Thunder" />
                 </UniformGrid>
             </Border>
-          <ComboBox assists:ComboBoxAssist.Label="Starting Spell Limit" Theme="{StaticResource MaterialOutlineComboBox}"
-              ItemsSource="{Binding Source={x:Static rc:Enums.StartingResourceLimitList}}"
-              SelectedItem="{Binding Config.StartSpellsLimit, Converter={x:Static ui:Util.EnumConvert}}"
-          >
-              <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.StartingSpellLimitToolTip}"/></ToolTip.Tip>
-          </ComboBox>
+            <ComboBox Theme="{StaticResource MaterialOutlineComboBox}"
+                      ItemsSource="{Binding Source={x:Static rc:Enums.StartingResourceLimitList}}"
+                      SelectedItem="{Binding Config.StartSpellsLimit, Converter={x:Static ui:Util.EnumConvert}}"
+                      assists:ComboBoxAssist.Label="Starting Spell Limit">
+                <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.StartingSpellLimitToolTip}"/></ToolTip.Tip>
+            </ComboBox>
         </StackPanel>
         <StackPanel Grid.Column="2">
             <StackPanel Margin="26 16" HorizontalAlignment="Left">
@@ -143,18 +146,16 @@
                 </Grid>
             </StackPanel>
             <Separator/>
-            <ComboBox
-                assists:ComboBoxAssist.Label="Starting Sword Techniques" Theme="{StaticResource MaterialOutlineComboBox}"
-                ItemsSource="{Binding Source={x:Static rc:Enums.StartingTechList}}"
-                SelectedItem="{Binding Config.StartingTechniques, Converter={x:Static ui:Util.EnumConvert}}"
-            >
+            <ComboBox Theme="{StaticResource MaterialOutlineComboBox}"
+                      ItemsSource="{Binding Source={x:Static rc:Enums.StartingTechList}}"
+                      SelectedItem="{Binding Config.StartingTechniques, Converter={x:Static ui:Util.EnumConvert}}"
+                      assists:ComboBoxAssist.Label="Starting Sword Techniques">
                 <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.StartingSwordTechniquesToolTip}"/></ToolTip.Tip>
             </ComboBox>
-            <ComboBox
-                assists:ComboBoxAssist.Label="Starting Lives" Theme="{StaticResource MaterialOutlineComboBox}"
-                ItemsSource="{Binding Source={x:Static rc:Enums.StartingLivesList}}"
-                SelectedItem="{Binding Config.StartingLives, Converter={x:Static ui:Util.EnumConvert}}"
-            >
+            <ComboBox Theme="{StaticResource MaterialOutlineComboBox}"
+                      ItemsSource="{Binding Source={x:Static rc:Enums.StartingLivesList}}"
+                      SelectedItem="{Binding Config.StartingLives, Converter={x:Static ui:Util.EnumConvert}}"
+                      assists:ComboBoxAssist.Label="Starting Lives">
                 <ToolTip.Tip><TextBlock Text="{x:Static lang:Resources.StartingLivesToolTip}"/></ToolTip.Tip>
             </ComboBox>
         </StackPanel>

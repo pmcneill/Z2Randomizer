@@ -33,7 +33,8 @@ public sealed class WestHyrule : World
     private Location bridge1;
     private Location bridge2;
     public Location pbagCave;
-	
+    public Location kingsTomb;
+
     private Location jumpCave;
     private Location fairyCave;
 
@@ -129,6 +130,7 @@ public sealed class WestHyrule : World
         grassTile = GetLocation(LocationID.WEST_GRASS);
         heartContainerCave = GetLocation(LocationID.WEST_CAVE_HEART_CONTAINER); //0x463f
         pbagCave = GetLocation(LocationID.WEST_CAVE_PBAG);
+        kingsTomb = GetLocation(LocationID.WEST_KINGS_TOMB);
 
         //Towns
         locationAtRauru = GetLocation(LocationID.WEST_TOWN_RAURO);
@@ -277,11 +279,14 @@ public sealed class WestHyrule : World
             unimportantLocs.Add(GetLocation(LocationID.WEST_BAGU_WOODS5));
             unimportantLocs.Add(GetLocation(LocationID.WEST_MINOR_ROAD));
             unimportantLocs.Add(GetLocation(LocationID.WEST_MINOR_DESERT));
-            if(!props.HelpfulHints)
-            {
-                unimportantLocs.Add(GetLocation(LocationID.WEST_KINGS_TOMB));
-            }
         }
+
+        if (props.StartingLocation != StartingLocation.NORTH_PALACE)
+        {
+            // North Palace is useless if we don't start there
+            RemoveLocations([northPalace]);
+        }
+
         biome = props.WestBiome;
         if (biome.UsesVanillaMap() || props.WestSize == OverworldSizeOption.LARGE)
         {
@@ -802,14 +807,8 @@ public sealed class WestHyrule : World
             }
         }
 
-        visitation[northPalace.Y, northPalace.Xpos] = true;
+        //visitation[startLocation.Y, startLocation.Xpos] = true;
         return true;
-    }
-
-    public void SetStart()
-    {
-        visitation[northPalace.Y, northPalace.Xpos] = true;
-        northPalace.Reachable = true;
     }
 
     private bool PlaceBagu()
@@ -1384,17 +1383,10 @@ public sealed class WestHyrule : World
         }
     }
 
-
-    public override void UpdateVisit(IReadOnlySet<RequirementType> requireables)
-    {
-        visitation[northPalace.Y, northPalace.Xpos] = true;
-        base.UpdateVisit(requireables);
-    }
-
     protected override List<Location> GetPathingStarts()
     {
         return connections.Keys.Where(i => i.Reachable)
-            .Union(new List<Location>() { northPalace })
+            .Union(startLocation != null ? [startLocation] : [])
             .Union(GetContinentConnections().Where(i => i.Reachable))
             .ToList();
     }
@@ -1414,7 +1406,7 @@ public sealed class WestHyrule : World
         {
             pendingCoordinates.Enqueue((location.Y, location.Xpos));
         }
-        pendingCoordinates.Enqueue((northPalace.Y, northPalace.Xpos));
+        //pendingCoordinates.Enqueue((startLocation.Y, startLocation.Xpos));
         int y, x;
         do
         {
@@ -1470,7 +1462,7 @@ public sealed class WestHyrule : World
     {
         HashSet<Location> requiredLocations =
         [
-            northPalace,
+            //northPalace,
             locationAtRauru,
             locationAtMido,
             locationAtRuto,
