@@ -589,7 +589,7 @@ TitleEnd:
         /*
          * Dear future Ellendar,
          * This method is still garbage, but better.
-         * Eventually we need to create a data structure that represents the individual properies of things like sprites
+         * Eventually we need to create a data structure that represents the individual properties of things like sprites
          * that we can save in external files so they can be imported from a simple format people can use to customize all
          * the cosmetics.
          */

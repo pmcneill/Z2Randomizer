@@ -192,6 +192,8 @@ public class RandomizerProperties
     public bool PbagItemShuffle { get; set; }
     public bool StartWithSpellItems { get; set; }
     public bool ShufflePbagXp { get; set; }
+    public HashSet<Collectable> StartingSpells { get; set; } = [];
+    public HashSet<Collectable> RemoveItems { get; set; } = [];
 
     //Drops
     public bool ShuffleItemDropFrequency { get; set; }
@@ -253,6 +255,8 @@ public class RandomizerProperties
     //For Statistics
     [Key]
     public int Id { get; set; }
+
+    public bool CustomSpellOrder() => !IncludeSpellsInShuffle && RemoveItems.Count == 0;
 
     public bool StartsWithCollectable(Collectable collectable)
     {

@@ -688,6 +688,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private bool townQuestLocationsAreMinorItems = false;
     public bool townQuestLocationsAreMinorItemsIncluded() => includeSwordTechsInShuffle != false || includeQuestItemsInShuffle != false;
 
+    [Reactive]
+    private bool removeFairy = false;
+
     //Drops
     [Reactive]
     private bool shuffleItemDropFrequency = false;
@@ -1009,6 +1012,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
             Seed = seed
         };
 
+        properties.RemoveItems = [];
+        if (removeFairy) { properties.RemoveItems.Add(Collectable.FAIRY_SPELL); }
+
         //Set biomes first (so Vanilla Everything is known)
         ExportBiome(properties, r);
 
@@ -1017,7 +1023,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             //Start Configuration
             ShuffleStartingCollectables(POSSIBLE_STARTING_ITEMS, startItemsLimit, shuffleStartingItems, properties, r);
-            ShuffleStartingCollectables(POSSIBLE_STARTING_SPELLS, startSpellsLimit, shuffleStartingSpells, properties, r);
+            properties.StartingSpells = ShuffleStartingCollectables(POSSIBLE_STARTING_SPELLS, startSpellsLimit, shuffleStartingSpells, properties, r).ToHashSet();
 
             // Give North Palace its chance to roll now. Other Random cases are rolled later.
             if (startingLocation.IsMetastyle() && r.Next(9) == 0)
@@ -1169,7 +1175,12 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         //Handle Fire
         Collectable RollLinkedFireSpell()
         {
-            return POSSIBLE_LINKED_FIRE_SPELLS[r.Next(POSSIBLE_LINKED_FIRE_SPELLS.Length)];
+            Collectable[] fireSpellOptions = POSSIBLE_LINKED_FIRE_SPELLS;
+            if (removeFairy)
+            {
+                fireSpellOptions = fireSpellOptions.Except([Collectable.FAIRY_SPELL]).ToArray();
+            }
+            return fireSpellOptions[r.Next(fireSpellOptions.Length)];
         }
         switch (fireOption)
         {
@@ -2030,7 +2041,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         };
     }
 
-    private void ShuffleStartingCollectables(Collectable[] possibleCollectables, StartingResourceLimit limit, bool shuffleRandom, 
+    private List<Collectable> ShuffleStartingCollectables(Collectable[] possibleCollectables, StartingResourceLimit limit, bool shuffleRandom, 
         RandomizerProperties properties, Random r)
     {
         int itemLimit = limit.AsInt();
@@ -2060,7 +2071,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
                 {
                     break;
                 }
-                if (!StartsWithCollectable(collectable))
+                if (!StartsWithCollectable(collectable) && !properties.RemoveItems.Contains(collectable))
                 {
                     if (r.Next(4) == 0)
                     {
@@ -2074,6 +2085,8 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             properties.SetStartingCollectable(collectable, startingItems.Contains(collectable));
         }
+
+        return startingItems;
     }
 
     private int CountPossibleMinorItems()

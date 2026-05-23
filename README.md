@@ -13,6 +13,7 @@ Download [nightly build here](https://nightly.link/initsu/Z2Randomizer/workflows
 - Split Bagu as an item location from other town quest items. (In case you think it's fun with the mirror & water shuffled, but not Bagu's Note.)
 - Add an option to replace shuffled town quest item locations with minor items (including the table in Saria, the fountain in Nabooru, and the down & upstab guys). This is meant to reduce the need to spend time going into towns, and favor overworld and palace exploration.
 - Add an option for 50% faster Fairy when combined with Dash.
+- Add an option to play Fairyless seeds for additional challenge (Remove Fairy). The Fairy spell is removed and the seed is guaranteed to be beatable without Fairy.
 
 ## Vanilla Everything
 Vanilla Everything means that for a continent, all locations will be the exact same and contain the same items as the vanilla game. This setting **overrides other shuffle settings for the selected continent**. Setting a continent to use this enables some special behaviors:
