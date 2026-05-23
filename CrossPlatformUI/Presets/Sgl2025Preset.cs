@@ -104,7 +104,7 @@ public static class Sgl2025Preset
         ShuffleBossHP = EnemyLifeOption.VANILLA,
         ShuffleXPStealers = true,
         ShuffleXPStolenAmount = true,
-        ShuffleSwordImmunity = false,
+        SwordImmunityOption = SwordImmunityOption.VANILLA,
         EnemyXPDrops = XPEffectiveness.SLIGHTLY_HIGH, // was +0 to +2
 
         //Items

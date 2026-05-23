@@ -102,7 +102,7 @@ public static class MaxRandoPreset
         ShuffleBossHP = EnemyLifeOption.MEDIUM,
         ShuffleXPStealers = true,
         ShuffleXPStolenAmount = true,
-        ShuffleSwordImmunity = true,
+        SwordImmunityOption = SwordImmunityOption.SHUFFLE,
         EnemyXPDrops = XPEffectiveness.WIDE,
 
         //Items
