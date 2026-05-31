@@ -40,8 +40,8 @@ public static class NormalPreset
         EastBiome = Biome.RANDOM_NO_VANILLA_OR_SHUFFLE,
         MazeBiome = Biome.VANILLALIKE,
         DmBiome = Biome.RANDOM_NO_VANILLA_OR_SHUFFLE,
-        WestClimate = ClimateEnum.VANILLA_WEIGHTED_WEST,
-        EastClimate = ClimateEnum.VANILLA_WEIGHTED_EAST,
+        WestClimate = ClimateEnum.VANILLA_WEIGHTED,
+        EastClimate = ClimateEnum.VANILLA_WEIGHTED,
         DmClimate = ClimateEnum.CLASSIC,
         ContinentConnectionType = ContinentConnectionType.TRANSPORTATION_SHUFFLE,
 
