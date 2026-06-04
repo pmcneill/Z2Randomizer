@@ -27,6 +27,8 @@
                             </Button.Content>
                             <Button.Flyout>
                                 <MenuFlyout>
+                                    <MenuItem Header="Vanilla Preset" Command="{Binding LoadPreset}"
+                                              CommandParameter="{Binding Source={x:Static presets:VanillaPreset.Preset}}"/>
                                     <MenuItem Header="Beginner Preset" Command="{Binding LoadPreset}"
                                               CommandParameter="{Binding Source={x:Static presets:BeginnerPreset.Preset}}"/>
                                     <MenuItem Header="Normal Preset" Command="{Binding LoadPreset}"
