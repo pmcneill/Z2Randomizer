@@ -988,6 +988,9 @@ public class Hyrule
             excessItems.RemoveAt(excessItemIndex);
         }
 
+        Collectable GetShufflableOrMinor(Collectable vanilla) =>
+            shufflableItems.Contains(vanilla) ? vanilla : minorItems.Sample(r);
+
         //Do the actual shuffling
         List<Location> duplicateItemPlacementCandidates = [];
         palaces.ForEach(i => i.ItemRooms.ForEach(j => j.Collectable = null));
@@ -998,41 +1001,41 @@ public class Hyrule
         }
         else
         {
-            List<Collectable> itemsToActuallyShuffle;
-            List<Location> shufflableItemLocations;
+            // create new shufflableItems and itemLocs since we are only shuffling within the respective buckets
+            var palaceItemLocs = itemLocs.Where(i => i.PalaceNumber != null && i.PalaceNumber < 7).ToList();
+            var overworldItemLocs = itemLocs.Where(i => i.PalaceNumber == null).ToList();
 
             if (props.ShufflePalaceItems)
             {
-                itemsToActuallyShuffle = [];
-                shufflableItemLocations = [];
-                foreach (Location palaceLocation in itemLocs.Where(i => i.PalaceNumber != null))
+                List<Collectable> palaceShufflableItems = [];
+                foreach (Location palaceLocation in palaceItemLocs)
                 {
-                    shufflableItemLocations.Add(palaceLocation);
-                    Collectable vanillaCollectable = Palace.GetVanillaCollectable(palaceLocation.PalaceNumber);
-                    itemsToActuallyShuffle.Add(shufflableItems.Contains(vanillaCollectable) ? vanillaCollectable : minorItems.Sample(r));
-
+                    var vanillaCollectable = Palace.GetVanillaCollectable(palaceLocation.PalaceNumber);
+                    palaceShufflableItems.Add(GetShufflableOrMinor(vanillaCollectable));
                     for (int i = 1; i < props.PalaceItemRoomCounts[(int)palaceLocation.PalaceNumber! - 1]; i++)
                     {
-                        itemsToActuallyShuffle.Add(minorItems.Sample(r));
+                        palaceShufflableItems.Add(minorItems.Sample(r));
                     }
                 }
-                duplicateItemPlacementCandidates.AddRange(shufflableItemLocations);
-                DoShuffle(itemsToActuallyShuffle, shufflableItemLocations);
+                duplicateItemPlacementCandidates.AddRange(palaceItemLocs);
+                DoShuffle(palaceShufflableItems, palaceItemLocs);
             }
-            else
+            else // not shuffling palace items (still add minor items if extra locations)
             {
-                foreach (Location palaceLocation in itemLocs.Where(i => i.PalaceNumber != null && i.PalaceNumber < 7))
+                foreach (Location palaceLocation in palaceItemLocs)
                 {
-                    Collectable vanillaCollectable = Palace.GetVanillaCollectable(palaceLocation.PalaceNumber);
-                    palaceLocation.Collectables = [shufflableItems.Contains(vanillaCollectable) ? vanillaCollectable : minorItems.Sample(r)];
-                    palaces[(int)palaceLocation.PalaceNumber! - 1].ItemRooms.Sample(r)!.Collectable = vanillaCollectable;
-                    for (int i = 0; i < props.PalaceItemRoomCounts[(int)palaceLocation.PalaceNumber! - 1]; i++)
+                    var vanillaCollectable = Palace.GetVanillaCollectable(palaceLocation.PalaceNumber);
+                    palaceLocation.Collectables = [GetShufflableOrMinor(vanillaCollectable)];
+                    int palaceIndex = (int)palaceLocation.PalaceNumber! - 1;
+                    Palace palace = palaces[palaceIndex];
+                    palace.ItemRooms.Sample(r)!.Collectable = vanillaCollectable;
+                    for (int i = 0; i < props.PalaceItemRoomCounts[palaceIndex]; i++)
                     {
-                        if (palaces[(int)palaceLocation.PalaceNumber! - 1].ItemRooms[i].Collectable == null)
+                        if (palace.ItemRooms[i].Collectable == null)
                         {
                             Collectable smallItem = minorItems.Sample(r);
                             palaceLocation.Collectables.Add(smallItem);
-                            palaces[(int)palaceLocation.PalaceNumber! - 1].ItemRooms[i].Collectable = smallItem;
+                            palace.ItemRooms[i].Collectable = smallItem;
                         }
                     }
                 }
@@ -1040,23 +1043,20 @@ public class Hyrule
 
             if (props.ShuffleOverworldItems)
             {
-                itemsToActuallyShuffle = [];
-                shufflableItemLocations = [];
-                foreach (Location nonPalaceLocation in itemLocs.Where(i => i.PalaceNumber == null))
+                List<Collectable> itemsToActuallyShuffle = [];
+                foreach (Location nonPalaceLocation in overworldItemLocs)
                 {
-                    shufflableItemLocations.Add(nonPalaceLocation);
-                    itemsToActuallyShuffle.Add(shufflableItems.Contains(nonPalaceLocation.VanillaCollectable) 
-                        ? nonPalaceLocation.VanillaCollectable : minorItems.Sample(r));
+                    itemsToActuallyShuffle.Add(GetShufflableOrMinor(nonPalaceLocation.VanillaCollectable));
                 }
-                duplicateItemPlacementCandidates.AddRange(shufflableItemLocations);
-                DoShuffle(itemsToActuallyShuffle, shufflableItemLocations);
+                duplicateItemPlacementCandidates.AddRange(overworldItemLocs);
+                DoShuffle(itemsToActuallyShuffle, overworldItemLocs);
             }
             else
             {
-                foreach (Location nonPalaceLocation in itemLocs.Where(i => i.PalaceNumber == null))
+                foreach (Location nonPalaceLocation in overworldItemLocs)
                 {
                     Collectable vanillaCollectable = nonPalaceLocation.VanillaCollectable;
-                    nonPalaceLocation.Collectables = [shufflableItems.Contains(vanillaCollectable) ? vanillaCollectable : minorItems.Sample(r)];
+                    nonPalaceLocation.Collectables = [GetShufflableOrMinor(vanillaCollectable)];
                 }
             }
         }
@@ -1184,14 +1184,7 @@ public class Hyrule
 
     private void DoShuffle(List<Collectable> itemsToShuffle, List<Location> itemShuffleLocations)
     {
-        int itemShuffleLocationsCount = itemShuffleLocations.Count;
-        if(itemShuffleLocations.Any(i => i.PalaceNumber != null))
-        {
-            itemShuffleLocationsCount = itemShuffleLocationsCount
-                - itemShuffleLocations.Count(i => i.PalaceNumber != null)
-                + props.PalaceItemRoomCounts.Sum(i => i);
-                //- props.PalaceItemRoomCounts.Where(i => i == 0).Count();
-        }
+        int itemShuffleLocationsCount = itemShuffleLocations.Sum(loc => loc.GetItemCapacity(props));
         if (itemsToShuffle.Count != itemShuffleLocationsCount)
         {
             throw new Exception("Item locations must match number of items");

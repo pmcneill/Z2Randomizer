@@ -310,4 +310,20 @@ public class Location
         EntranceNumber = 0;
         CanShuffle = false;
     }
+
+    public int GetItemCapacity(RandomizerProperties props)
+    {
+        if (PalaceNumber != null)
+        {
+            if (PalaceNumber < 7)
+            {
+                return props.PalaceItemRoomCounts[PalaceNumber.Value - 1];
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        return VanillaCollectable == Collectable.DO_NOT_USE ? 0 : 1;
+    }
 }
