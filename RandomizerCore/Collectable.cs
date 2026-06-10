@@ -195,6 +195,25 @@ public static class CollectableExtensions
         };
     }
 
+    public static bool IsPalaceItem(this Collectable collectable)
+    {
+        return collectable switch
+        {
+            Collectable.CANDLE => true,
+            Collectable.GLOVE => true,
+            Collectable.RAFT => true,
+            Collectable.BOOTS => true,
+            Collectable.FLUTE => true,
+            Collectable.CROSS => true,
+            _ => false
+        };
+    }
+
+    public static bool IsOverworldItem(this Collectable collectable)
+    {
+        return !collectable.IsMinorItem() && !collectable.IsPalaceItem();
+    }
+
     public static bool IsSpell(this Collectable collectable)
     {
         return collectable switch

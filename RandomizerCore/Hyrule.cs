@@ -651,7 +651,8 @@ public class Hyrule
         List<Collectable> minorItems = [Collectable.BLUE_JAR, Collectable.RED_JAR, Collectable.SMALL_BAG,
             Collectable.MEDIUM_BAG, Collectable.LARGE_BAG, Collectable.XL_BAG, Collectable.ONEUP, Collectable.KEY];
 
-        List<Collectable> excessItems = [];
+        List<Collectable> overworldExcessItems = [];
+        List<Collectable> palaceExcessItems = [];
 
         if (props.PbagItemShuffle)
         {
@@ -708,8 +709,8 @@ public class Hyrule
             {
                 westHyrule.mirrorTable.Collectables = [minorItems.Sample(r)];
                 eastHyrule.fountain.Collectables = [minorItems.Sample(r)];
-                excessItems.Add(Collectable.MIRROR);
-                excessItems.Add(Collectable.WATER);
+                overworldExcessItems.Add(Collectable.MIRROR);
+                overworldExcessItems.Add(Collectable.WATER);
         }
         }
 
@@ -724,8 +725,8 @@ public class Hyrule
             {
                 westHyrule.midoChurch.Collectables = [minorItems.Sample(r)];
                 eastHyrule.daruniaRoof.Collectables = [minorItems.Sample(r)];
-                excessItems.Add(Collectable.UPSTAB);
-                excessItems.Add(Collectable.DOWNSTAB);
+                overworldExcessItems.Add(Collectable.UPSTAB);
+                overworldExcessItems.Add(Collectable.DOWNSTAB);
             }
         }
 
@@ -936,7 +937,7 @@ public class Hyrule
             }
                 else
                 {
-                    excessItems.Remove(Collectable.DOWNSTAB);
+                    overworldExcessItems.Remove(Collectable.DOWNSTAB);
                 }
             }
             if (props.StartWithUpstab)
@@ -947,7 +948,7 @@ public class Hyrule
             }
                 else
                 {
-                    excessItems.Remove(Collectable.UPSTAB);
+                    overworldExcessItems.Remove(Collectable.UPSTAB);
         }
             }
         }
@@ -955,15 +956,15 @@ public class Hyrule
         //Heart containers over 4 are excess
         for (int i = 4; i < heartContainersInItemPool; i++)
         {
-            excessItems.Add(Collectable.HEART_CONTAINER);
+            overworldExcessItems.Add(Collectable.HEART_CONTAINER);
         }
 
         for (int i = 4; i < magicContainersInItemPool; i++)
         {
-            excessItems.Add(Collectable.MAGIC_CONTAINER);
+            overworldExcessItems.Add(Collectable.MAGIC_CONTAINER);
         }
 
-        int extraPalaceItemCount = props.PalaceItemRoomCounts.Select(c => Math.Max(c - 1, 0)).Sum();
+        int extraPalaceItemCount = props.PalaceItemRoomCounts.Sum(c => Math.Max(c - 1, 0));
         for (int i = 0; i < extraPalaceItemCount; i++)
         {
             shufflableItems.Add(minorItems.Sample(r));
@@ -987,20 +988,13 @@ public class Hyrule
                 }
                 else
                 {
-                    excessItems.Add(vanillaPalaceItem);
+                    palaceExcessItems.Add(vanillaPalaceItem);
                     shufflableItems.Remove(vanillaPalaceItem);
                 }
             }
         }
 
-        List<int> minorItemIndexes = [];
-        for(int i = 0; i < shufflableItems.Count; i++)
-        {
-            if (shufflableItems[i].IsMinorItem())
-            {
-                minorItemIndexes.Add(i);
-            }
-        }
+        int minorItemCount = shufflableItems.Count(item => item.IsMinorItem());
 
         //Add the auto pbag cave promotion
         List<Location> overflowLocations = [];
@@ -1015,8 +1009,31 @@ public class Hyrule
                 overflowLocations.AddRange([eastHyrule.pbagCave1, eastHyrule.pbagCave2]);
             }
         }
-        int overflowLocationsRequired = excessItems.Count - minorItemIndexes.Count;
-
+        int overflowLocationsRequired = 0;
+        List<Collectable> excessItems = [.. overworldExcessItems, .. palaceExcessItems];
+        if (props.MixOverworldPalaceItems)
+        {
+            overflowLocationsRequired = excessItems.Count - minorItemCount;
+        }
+        if (!props.MixOverworldPalaceItems)
+        {
+            if (props.ShufflePalaceItems)
+            {
+                // Expanding P-bag caves won't help palace items when the pools are not mixed
+                if (palaceExcessItems.Count > 0)
+                {
+                    throw new Exception("Insufficient locations to place excess Palace items. The validation should have caught this.");
+                }
+            }
+            if (props.ShuffleOverworldItems)
+            {
+                List<Location> overworldItemLocs = [.. itemLocs.Where(i => i.PalaceNumber == null)];
+                List<Collectable> overworldShufflableItems = [.. shufflableItems.Where(collectable => collectable.IsOverworldItem())];
+                // Only excess Overworld items are relevant with mix disabled
+                int overworldOverflowCount = overworldExcessItems.Count + overworldShufflableItems.Count - overworldItemLocs.Count;
+                overflowLocationsRequired = overworldOverflowCount;
+            }
+        }
 
         if (overflowLocationsRequired > overflowLocations.Count)
         {
@@ -1028,18 +1045,16 @@ public class Hyrule
             Location overflowLocation = overflowLocations.Sample(r)!;
             itemLocs.Add(overflowLocation);
             shufflableItems.Add(Collectable.SMALL_BAG);
-            minorItemIndexes.Add(shufflableItems.Count - 1);
+            minorItemCount++;
             overflowLocations.Remove(overflowLocation);
         }
 
         while(excessItems.Count > 0)
         {
-            int minorItemIndexIndex = r.Next(0, minorItemIndexes.Count);
-            int minorItemIndex = minorItemIndexes[minorItemIndexIndex];
             int excessItemIndex = r.Next(0, excessItems.Count);
-
+            int minorItemIndex = shufflableItems.FindIndex(item => item.IsMinorItem());
+            Debug.Assert(minorItemIndex != -1);
             shufflableItems[minorItemIndex] = excessItems[excessItemIndex];
-            minorItemIndexes.RemoveAt(minorItemIndexIndex);
             excessItems.RemoveAt(excessItemIndex);
         }
 
@@ -1110,20 +1125,16 @@ public class Hyrule
         else
         {
             // create new shufflableItems and itemLocs since we are only shuffling within the respective buckets
-            var palaceItemLocs = itemLocs.Where(i => i.PalaceNumber != null && i.PalaceNumber < 7).ToList();
-            var overworldItemLocs = itemLocs.Where(i => i.PalaceNumber == null).ToList();
+            List<Location> palaceItemLocs = [.. itemLocs.Where(i => i.PalaceNumber != null && i.PalaceNumber < 7)];
+            List<Location> overworldItemLocs = [.. itemLocs.Where(i => i.PalaceNumber == null)];
 
             if (props.ShufflePalaceItems)
             {
-                List<Collectable> palaceShufflableItems = [];
-                foreach (Location palaceLocation in palaceItemLocs)
+                List<Collectable> palaceShufflableItems = [.. shufflableItems.Where(collectable => collectable.IsPalaceItem())];
+                int palaceItemTotal = props.PalaceItemRoomCounts.Sum();
+                while (palaceShufflableItems.Count < palaceItemTotal)
                 {
-                    var vanillaCollectable = Palace.GetVanillaCollectable(palaceLocation.PalaceNumber);
-                    palaceShufflableItems.Add(GetShufflableOrMinor(vanillaCollectable));
-                    for (int i = 1; i < props.PalaceItemRoomCounts[(int)palaceLocation.PalaceNumber! - 1]; i++)
-                    {
-                        palaceShufflableItems.Add(minorItems.Sample(r));
-                    }
+                    palaceShufflableItems.Add(minorItems.Sample(r));
                 }
                 duplicateItemPlacementCandidates.AddRange(palaceItemLocs);
                 DoShuffle(palaceShufflableItems, palaceItemLocs);
@@ -1151,13 +1162,13 @@ public class Hyrule
 
             if (props.ShuffleOverworldItems)
             {
-                List<Collectable> itemsToActuallyShuffle = [];
-                foreach (Location nonPalaceLocation in overworldItemLocs)
+                List<Collectable> overworldShufflableItems = [.. shufflableItems.Where(collectable => collectable.IsOverworldItem())];
+                while (overworldShufflableItems.Count < overworldItemLocs.Count)
                 {
-                    itemsToActuallyShuffle.Add(GetShufflableOrMinor(nonPalaceLocation.VanillaCollectable));
+                    overworldShufflableItems.Add(minorItems.Sample(r));
                 }
                 duplicateItemPlacementCandidates.AddRange(overworldItemLocs);
-                DoShuffle(itemsToActuallyShuffle, overworldItemLocs);
+                DoShuffle(overworldShufflableItems, overworldItemLocs);
             }
             else
             {
