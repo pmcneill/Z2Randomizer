@@ -226,6 +226,13 @@ zp_de = $de
 zp_df = $df                              ; Enemy type temporary storage
 
 ; $e0-$ef are music and sound variables
+Z2NoiseSoundQueue = $ed
+Z2Square2SoundQueue = $ee
+Z2Square1SoundQueue = $ef
+
+NoiseSoundQueue = $f0
+Square2SoundQueue = $f1
+Square1SoundQueue = $f2
 
 ; Potentially free zero page memory bytes at $f1-$f4 and since they are used by FDS BIOS but not the NES
 Controller1ButtonsPressed = $f5
@@ -240,6 +247,18 @@ PpuCtrlShadow = $ff
 ; $100-$1ff stack memory
 
 ; $200-$2ff OAM buffer
+SpriteYPosition = $200
+SpriteTilenumber = $201
+SpriteAttributes = $202
+SpriteXPosition = $203
+SpriteData = SpriteYPosition
+
+PpuBufferLength = $0301
+PpuAddrHi = $0302
+PpuAddrLo = $0303
+PpuTextLength = $0304
+PpuTextData = $0305
+PpuBuffer2Length = $0362
 
 LinkXSubpixel = $03d6
 Enemy0XSubpixel = $03d7
@@ -261,11 +280,13 @@ LinksShadowSwordYHitbox = $0481
 LandingAnimationTimer = $0497
 HitboxXCoord = $047e
 HitboxYCoord = $0480
+SpriteSlotShuffleCounter = $0485         ; 0-5
 
 LinkIFrameTimer = $500
 timer_501 = $0501                        ; $501 through $50d are timers that are decreased each frame until 0
 LinkEntrySlideTime = $0503
 SwordAttackTimer = $050a
+InjuryTimer = $050c
 EncounterSpawnTimer = $0516
 RNG = $051b
 MapNumber = $0561
@@ -288,7 +309,7 @@ SavedDoorExit2X = $05d9
 SmallDropCount = $05df
 LargeDropCount = $05e0
 
-OverworldStepCounterHi = $06e0           ; [Z2R] Used for half encounter rate to only trigger encounters every other time the steps are reached
+OverworldStepCounterHi = $06e0           ; [Z2R] Used for halved encounter rate to only trigger encounters every other time the steps are reached
 
 Lives = $0700
 EntryFacing = $0701                      ; Sideview entry facing direction. 0=Facing right (enter from the left), 1=Facing left (enter from the right)
@@ -302,14 +323,16 @@ ColumnScrollDirection = $0720            ; Scroll direction that is updated only
 ColumnScrollX = $0721                    ; Scroll position within the current tile column ($00-$1f)
 DialogBoxDrawing = $0726                 ; >0 when drawing dialog and during black screen transitions
 ScrollFrozen = $0728                     ; 1=Screen scrolling frozen (for boss fights)
-ScrollPage = $072a                       ; Which page the left-most pixel of the screen is on (0-3)
-ScrollX = $072c
+ScrollLeftPage = $072a                   ; Which page the left-most pixel of the screen is on (0-3)
+ScrollRightPage = $72b
+ScrollLeftX = $072c
+ScrollRightX = $072d
 SideviewCommandY = $0730
 SideviewCommandOp = $0731
-ScrollLeftPage = $0732
-ScrollRightPage = $0733
-ScrollLeftColumn = $0734                 ; Which left background column to update during scrolling
-ScrollRightColumn = $0735                ; Which right background column to update during scrolling
+UpdateScrollColumnLeftPage = $0732
+UpdateScrollColumnRightPage = $0733
+UpdateScrollColumnLeftTile = $0734       ; Which left background column to update during scrolling
+UpdateScrollColumnRightTile = $0735      ; Which right background column to update during scrolling
 GameMode = $0736
 GameModeCurrent = $0737                  ; GameMode is compared to this and only triggered if it has changed
 
@@ -321,6 +344,8 @@ LocationNumber = $0748                   ; Location index sideview exits to or $
 MagicSelectorPosition = $0749
 LinkFlashingTimer = $074b                ; Link changes palette and this value is counted down until it's 0. 0b10000000 bit determines if the background changes color.
 CurrentDialogType = $074c                ; 0=None, 1 = Level Up, 2 = Talking
+HudSectionFlag = $074f                   ; 0x80=Draw Magic & Attack, 0x40=Draw Life & XP
+HudDrawState = $0750
 ExpToAddHi = $0755
 ExpToAddLo = $0756
 DoorDepth = $075b                        ; Used as an index for saving/loading your x position when you enter/leave (nested) doors
@@ -359,6 +384,12 @@ HaveFlute = $0789
 HaveCross = $078a
 HaveHammer = $078b
 HaveMagicKey = $078c
+Crystal1Placed = $078d
+Crystal2Placed = $078e
+Crystal3Placed = $078f
+Crystal4Placed = $0790
+Crystal5Placed = $0791
+Crystal6Placed = $0792
 Keys = $0793                             ; Current number of Keys
 Crystals = $0794                         ; Number of Crystals left
 HaveStabs = $0796                        ; 0x04 = Have Downstab | 0x10 = Have Upstab
@@ -369,6 +400,9 @@ HaveWater = $079b                        ; 1 = Have Water
 HaveChild = $079c                        ; 0x20 = Have Child
 HaveBasementAccess = $079d               ; 0x08 = Have New Kasuto Basement access
 ContinuesUsed = $079f
+
+; New variables that use free memory
+ProjectileEnemyData = $07c0              ; [Z2R] 6 bytes for Hard Carock projectile type
 
 BackgroundTilesPage1 = $6000
 BackgroundTilesPage2 = $60d0
