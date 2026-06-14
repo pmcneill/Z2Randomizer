@@ -64,6 +64,22 @@ public static class TownExtensions
         };
     }
 
+    public static bool WizardRequiresQuestItem(this Town town)
+    {
+        return town switch
+        {
+            Town.RAURU => false,
+            Town.RUTO => true,
+            Town.SARIA_NORTH => true,
+            Town.MIDO_WEST => true,
+            Town.NABOORU => true,
+            Town.DARUNIA_WEST => true,
+            Town.NEW_KASUTO => false,
+            Town.OLD_KASUTO => false,
+            _ => false
+        };
+    }
+
     public static string HintName(this Town town)
     {
         return town switch

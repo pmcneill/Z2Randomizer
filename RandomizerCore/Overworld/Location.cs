@@ -327,3 +327,25 @@ public class Location
         return VanillaCollectable == Collectable.DO_NOT_USE ? 0 : 1;
     }
 }
+
+public static class LocationExtensions
+{
+    public static IEnumerable<(Location Location, int SubIndex)> SubLocationEnumerable(this List<Location> list, RandomizerProperties props)
+    {
+        foreach (var location in list)
+        {
+            if (location.PalaceNumber is int palaceNum)
+            {
+                int subCount = location.GetItemCapacity(props);
+                for (int subIndex = 0; subIndex < subCount; subIndex++)
+                {
+                    yield return (location, subIndex);
+                }
+            }
+            else
+            {
+                yield return (location, 0);
+            }
+        }
+    }
+}

@@ -686,7 +686,6 @@ public class Hyrule
             ShuffleSpells();
         }
 
-        int mirrorIndex = -1, waterIndex = -1;
         if (props.IncludeBagusNoteInShuffle)
         {
             shufflableItems.Add(Collectable.BAGUS_NOTE);
@@ -700,9 +699,7 @@ public class Hyrule
             }
             else if (!props.TownQuestLocationsAreMinorItems)
             {
-                mirrorIndex = shufflableItems.Count;
                 shufflableItems.Add(Collectable.MIRROR);
-                waterIndex = shufflableItems.Count;
                 shufflableItems.Add(Collectable.WATER);
             }
             else
@@ -791,12 +788,13 @@ public class Hyrule
 
         if (props.StartWithSpellItems)
         {
-            Debug.Assert(shufflableItems[9] == Collectable.MEDICINE);
-            Debug.Assert(shufflableItems[10] == Collectable.TROPHY);
-            Debug.Assert(shufflableItems[17] == Collectable.CHILD);
-            shufflableItems[9] = minorItems[r.Next(minorItems.Count)];
-            shufflableItems[10] = minorItems[r.Next(minorItems.Count)];
-            shufflableItems[17] = minorItems[r.Next(minorItems.Count)];
+            var trophyIndex = shufflableItems.IndexOf(Collectable.TROPHY); // 10
+            shufflableItems[trophyIndex] = minorItems[r.Next(minorItems.Count)];
+            var medicineIndex = shufflableItems.IndexOf(Collectable.MEDICINE); // 9
+            shufflableItems[medicineIndex] = minorItems[r.Next(minorItems.Count)];
+            var childIndex = shufflableItems.IndexOf(Collectable.CHILD); // 17
+            shufflableItems[childIndex] = minorItems[r.Next(minorItems.Count)];
+
             ItemGet[Collectable.TROPHY] = true;
             ItemGet[Collectable.MEDICINE] = true;
             ItemGet[Collectable.CHILD] = true;
@@ -810,42 +808,50 @@ public class Hyrule
             townCollectable = westHyrule.AllLocations.First(i => i.ActualTown == Town.RUTO).Collectables[0];
             if (!townCollectable.IsMinorItem() && ItemGet[townCollectable])
             {
-                Debug.Assert(shufflableItems[10] == Collectable.TROPHY);
-                shufflableItems[10] = minorItems[r.Next(minorItems.Count)];
+                var trophyIndex = shufflableItems.IndexOf(Collectable.TROPHY); // 10
+                shufflableItems[trophyIndex] = minorItems[r.Next(minorItems.Count)];
                 ItemGet[Collectable.TROPHY] = true;
             }
 
             townCollectable = westHyrule.AllLocations.First(i => i.ActualTown == Town.MIDO_WEST).Collectables[0];
             if (!townCollectable.IsMinorItem() && ItemGet[townCollectable])
             {
-                Debug.Assert(shufflableItems[9] == Collectable.MEDICINE);
-                shufflableItems[9] = minorItems[r.Next(minorItems.Count)];
+                var medicineIndex = shufflableItems.IndexOf(Collectable.MEDICINE); // 9
+                shufflableItems[medicineIndex] = minorItems[r.Next(minorItems.Count)];
                 ItemGet[Collectable.MEDICINE] = true;
             }
 
             townCollectable = eastHyrule.AllLocations.First(i => i.ActualTown == Town.DARUNIA_WEST).Collectables[0];
             if (!townCollectable.IsMinorItem() && ItemGet[townCollectable])
             {
-                Debug.Assert(shufflableItems[17] == Collectable.CHILD);
-                shufflableItems[17] = minorItems[r.Next(minorItems.Count)];
+                var childIndex = shufflableItems.IndexOf(Collectable.CHILD); // 17
+                shufflableItems[childIndex] = minorItems[r.Next(minorItems.Count)];
                 ItemGet[Collectable.CHILD] = true;
             }
 
             if (props.IncludeQuestItemsInShuffle)
             {
                 townCollectable = westHyrule.AllLocations.First(i => i.ActualTown == Town.SARIA_NORTH).Collectables[0];
-                if (!townCollectable.IsMinorItem() && ItemGet[townCollectable] && mirrorIndex != -1)
+                if (!townCollectable.IsMinorItem() && ItemGet[townCollectable])
                 {
-                    Debug.Assert(shufflableItems[mirrorIndex] == Collectable.MIRROR);
-                    shufflableItems[mirrorIndex] = minorItems[r.Next(minorItems.Count)];
+                    var mirrorIndex = shufflableItems.IndexOf(Collectable.MIRROR);
+                    if (mirrorIndex != -1)
+                    {
+                        shufflableItems[mirrorIndex] = minorItems[r.Next(minorItems.Count)];
+                    }
+                    overworldExcessItems.Remove(Collectable.MIRROR);
                     ItemGet[Collectable.MIRROR] = true;
                 }
 
                 townCollectable = eastHyrule.AllLocations.First(i => i.ActualTown == Town.NABOORU).Collectables[0];
-                if (!townCollectable.IsMinorItem() && ItemGet[townCollectable] && waterIndex != -1)
+                if (!townCollectable.IsMinorItem() && ItemGet[townCollectable])
                 {
-                    Debug.Assert(shufflableItems[waterIndex] == Collectable.WATER);
-                    shufflableItems[waterIndex] = minorItems[r.Next(minorItems.Count)];
+                    var waterIndex = shufflableItems.IndexOf(Collectable.WATER);
+                    if (waterIndex != -1)
+                    {
+                        shufflableItems[waterIndex] = minorItems[r.Next(minorItems.Count)];
+                    }
+                    overworldExcessItems.Remove(Collectable.WATER);
                     ItemGet[Collectable.WATER] = true;
                 }
             }
@@ -1314,30 +1320,36 @@ public class Hyrule
         //Clear all locations, then set them to the newly shuffled items
         itemShuffleLocations.ForEach(i => i.Collectables.Clear());
 
-        using var itemLocsIterator = itemShuffleLocations.GetEnumerator();
-        Location? location = null;
-        int subIndex = 0;
-        foreach (Collectable item in itemsToShuffle)
-        {
-            if (location?.PalaceNumber == null)
-            {
-                if (!itemLocsIterator.MoveNext()) { throw new InvalidOperationException("Ran out of item locations."); }
-                location = itemLocsIterator.Current;
-            }
-            while (location.PalaceNumber is int palaceNum && ++subIndex > props.PalaceItemRoomCounts[palaceNum - 1])
-            {
-                subIndex = 0;
-                if (!itemLocsIterator.MoveNext()) { throw new InvalidOperationException("Ran out of item locations."); }
-                location = itemLocsIterator.Current;
-            }
+        var subLocations = itemShuffleLocations.SubLocationEnumerable(props).ToList();
 
-            location.Collectables.Add(item);
-            if (location.PalaceNumber is int palaceNumInIf)
+        if (props.IncludeSpellsInShuffle && !props.QuestItemChainsAllowed)
+        {
+            for (int slotIndex = subLocations.Count - 1; slotIndex >= 0; slotIndex--)
             {
-                palaces[palaceNumInIf - 1].ItemRooms[subIndex - 1].Collectable = item;
+                var (location, _) = subLocations[slotIndex];
+                if (!(location.ActualTown?.WizardRequiresQuestItem() ?? false)) { continue; }
+                int itemIndex = itemsToShuffle.FindIndex(item => !item.IsAnyQuestItem());
+                if (itemIndex == -1) { throw new Exception("Did not find item to give town wizard"); }
+                PlaceItem(subLocations[slotIndex], itemsToShuffle[itemIndex]);
+                itemsToShuffle.RemoveAt(itemIndex);
+                subLocations.RemoveAt(slotIndex);
             }
         }
-        Debug.Assert(!itemLocsIterator.MoveNext(), "All item locations were not used. This should not happen.");
+
+        for (int i = 0; i < itemsToShuffle.Count; i++)
+        {
+            PlaceItem(subLocations[i], itemsToShuffle[i]);
+        }
+    }
+
+    private void PlaceItem((Location Location, int SubIndex) subLocation, Collectable item)
+    {
+        var (location, subIndex) = subLocation;
+        location.Collectables.Add(item);
+        if (location.PalaceNumber is int palaceNum)
+        {
+            palaces[palaceNum - 1].ItemRooms[subIndex].Collectable = item;
+        }
     }
 
     private async Task<byte[]> FillPalaceRooms(AsmModule sideviewModule)
@@ -3347,9 +3359,9 @@ CustomFileSelectData:
     public IEnumerable<Location> GetNonSideviewItemLocations()
     {
         return AllLocationsForReal().Where(
-            i => i.VanillaCollectable.IsSpell()
-        || i.VanillaCollectable.IsQuestItem()
-        || i.VanillaCollectable.IsSwordTech());
+            i => i.VanillaCollectable.IsSpell() ||
+                 i.VanillaCollectable.IsNewQuestItem() ||
+                 i.VanillaCollectable.IsSwordTech());
     }
 
     public void PrintRoutingDebug(int count, int wh, int eh, int dm, int mi)

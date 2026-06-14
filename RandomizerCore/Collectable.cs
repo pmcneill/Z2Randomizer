@@ -231,13 +231,27 @@ public static class CollectableExtensions
         };
     }
 
-    public static bool IsQuestItem(this Collectable collectable)
+    public static bool IsNewQuestItem(this Collectable collectable)
     {
         return collectable switch
         {
             Collectable.WATER => true,
             Collectable.BAGUS_NOTE => true,
             Collectable.MIRROR => true,
+            _ => false
+        };
+    }
+
+    public static bool IsAnyQuestItem(this Collectable collectable)
+    {
+        return collectable switch
+        {
+            Collectable.TROPHY => true,
+            Collectable.MEDICINE => true,
+            Collectable.MIRROR => true,
+            Collectable.WATER => true,
+            Collectable.CHILD => true,
+            Collectable.BAGUS_NOTE => true,
             _ => false
         };
     }

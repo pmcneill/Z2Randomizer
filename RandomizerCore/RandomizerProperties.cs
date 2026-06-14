@@ -177,6 +177,7 @@ public class RandomizerProperties
     public bool ShufflePalaceItems { get; set; }
     public bool MixOverworldPalaceItems { get; set; }
     public bool IncludeSpellsInShuffle { get; set; }
+    public bool QuestItemChainsAllowed { get; set; }
     public bool IncludeSwordTechsInShuffle { get; set; }
     //Fountain water / Saria mirror
     public bool IncludeQuestItemsInShuffle { get; set; }

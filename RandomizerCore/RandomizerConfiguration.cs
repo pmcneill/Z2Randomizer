@@ -675,6 +675,11 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private bool? includeSpellsInShuffle = false;
 
     [Reactive]
+    [ConditionallyIncludeInFlags]
+    private bool questItemChainsAllowed = false;
+    public bool questItemChainsAllowedIncluded() => includeSpellsInShuffle != false;
+
+    [Reactive]
     private bool? includeSwordTechsInShuffle = false;
 
     [Reactive]
@@ -1851,6 +1856,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.ShufflePalaceItems = shufflePalaceItems ?? GetIndeterminateFlagValue(r);
         properties.MixOverworldPalaceItems = mixOverworldAndPalaceItemsIncluded() && (mixOverworldAndPalaceItems ?? GetIndeterminateFlagValue(r));
         properties.IncludeSpellsInShuffle = includeSpellsInShuffle ?? GetIndeterminateFlagValue(r);
+        properties.QuestItemChainsAllowed = questItemChainsAllowedIncluded() && questItemChainsAllowed;
         properties.IncludeSwordTechsInShuffle = includeSwordTechsInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeQuestItemsInShuffle = includeQuestItemsInShuffle ?? GetIndeterminateFlagValue(r);
         properties.IncludeBagusNoteInShuffle = includeBagusNoteInShuffle ?? GetIndeterminateFlagValue(r);
