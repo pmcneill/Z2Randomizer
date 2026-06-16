@@ -23,6 +23,23 @@ public readonly record struct RandomizerResult(
     string? debuginfo = null,
     string? messages = null);
 
+public enum ProgressEnum
+{
+    GENERATING_PALACES = 1,
+    PROCESSING_OVERWORLD,
+    GENERATING_WEST_HYRULE,
+    GENERATING_DEATH_MOUNTAIN,
+    GENERATING_EAST_HYRULE,
+    GENERATING_MAZE_ISLAND,
+    SHUFFLING_ITEMS_AND_SPELLS,
+    RUNNING_COMPLETABILITY_CHECKS,
+    SHUFFLING_ENEMIES,
+    GENERATING_HINTS,
+    APPLYING_PATCHES,
+    LINKING_ASSEMBLY,
+    FINISHING_UP,
+}
+
 public class Hyrule
 {
     public delegate Assembler NewAssemblerFn(Js65Options? options = null, bool debugJavaScript = false);
@@ -266,7 +283,7 @@ public class Hyrule
             bool passedValidation = false;
             HashSet<int> freeBanks = [];
             if (ct.IsCancellationRequested) { return new RandomizerResult(false); }
-            UpdateProgress(progress, 1);
+            UpdateProgress(progress, ProgressEnum.GENERATING_PALACES);
 
             while (palaces.Count != 7 || passedValidation == false)
             {
@@ -340,7 +357,7 @@ public class Hyrule
             firstProcessOverworldTimestamp = DateTime.Now;
             await ProcessOverworld(progress, ct);
             if (ct.IsCancellationRequested) { return new RandomizerResult(false); }
-            UpdateProgress(progress, 8);
+            UpdateProgress(progress, ProgressEnum.SHUFFLING_ENEMIES);
 
             if (props.ShuffleOverworldEnemies)
             {
@@ -399,7 +416,7 @@ public class Hyrule
             }
 
             if (ct.IsCancellationRequested) { return new RandomizerResult(false); }
-            UpdateProgress(progress, 9);
+            UpdateProgress(progress, ProgressEnum.GENERATING_HINTS);
 
             List<Text> texts = CustomTexts.GenerateTexts(AllLocationsForReal(), itemLocs, ROMData.GetGameText(), props, r);
             StatRandomizer randomizedStats = new(ROMData, props);
@@ -426,13 +443,16 @@ public class Hyrule
                 randomizeMusic = props.RandomizeMusic;
             }
 
+            UpdateProgress(progress, ProgressEnum.APPLYING_PATCHES);
             ApplyAsmPatches(props, assembler, r, texts, ROMData, randomizedStats);
 
+            UpdateProgress(progress, ProgressEnum.LINKING_ASSEMBLY);
             var rom = await ROMData.ApplyAsm(assembler);
             if (!rom.success)
             {
                 return new RandomizerResult(false, null, null, string.Join(Environment.NewLine, rom.messages));
             }
+            UpdateProgress(progress, ProgressEnum.FINISHING_UP);
             ROMData = new ROM(rom.romdata);
 
             if (randomizeMusic)
@@ -1621,6 +1641,7 @@ public class Hyrule
 
     private async Task ProcessOverworld(Func<string, Task> progress, CancellationToken ct)
     {
+        UpdateProgress(progress, ProgressEnum.PROCESSING_OVERWORLD);
         if (props.RandomizeSmallItems)
         {
             RandomizeSmallItems(1, true);
@@ -1866,7 +1887,7 @@ public class Hyrule
             {
                 //GENERATE WEST
                 if (ct.IsCancellationRequested) { return; }
-                UpdateProgress(progress, 2);
+                UpdateProgress(progress, ProgressEnum.GENERATING_WEST_HYRULE);
                 nonContinentGenerationAttempts++;
                 timestamp = DateTime.Now;
                 if (!westHyrule.AllReached)
@@ -1885,7 +1906,7 @@ public class Hyrule
 
                 //GENERATE DM
                 if (ct.IsCancellationRequested) { return; }
-                UpdateProgress(progress, 3);
+                UpdateProgress(progress, ProgressEnum.GENERATING_DEATH_MOUNTAIN);
                 timestamp = DateTime.Now;
                 if (!deathMountain.AllReached)
                 {
@@ -1903,7 +1924,7 @@ public class Hyrule
 
                 //GENERATE EAST
                 if (ct.IsCancellationRequested) { return; }
-                UpdateProgress(progress, 4);
+                UpdateProgress(progress, ProgressEnum.GENERATING_EAST_HYRULE);
                 timestamp = DateTime.Now;
                 if (!eastHyrule.AllReached)
                 {
@@ -1921,7 +1942,7 @@ public class Hyrule
 
                 //GENERATE MAZE ISLAND
                 if (ct.IsCancellationRequested) { return; }
-                UpdateProgress(progress, 5);
+                UpdateProgress(progress, ProgressEnum.GENERATING_MAZE_ISLAND);
                 timestamp = DateTime.Now;
                 if (!mazeIsland.AllReached)
                 {
@@ -1941,7 +1962,7 @@ public class Hyrule
                 worlds.ForEach(i => i.SynchronizeLinkedLocations());
 
                 if (ct.IsCancellationRequested) { return; }
-                UpdateProgress(progress, 6);
+                UpdateProgress(progress, ProgressEnum.SHUFFLING_ITEMS_AND_SPELLS);
 
                 //Then perform non-terrain shuffles looking for one that works.
                 nonTerrainShuffleAttempt = 0;
@@ -1996,35 +2017,47 @@ public class Hyrule
         } while (!IsEverythingReachable(ItemGet));
     }
 
-    private async void UpdateProgress(Func<string, Task> progress, int v)
+    private async void UpdateProgress(Func<string, Task> progress, ProgressEnum v)
     {
         switch (v)
         {
-            case 1:
+            case ProgressEnum.GENERATING_PALACES:
                 await progress.Invoke("Generating Palaces");
                 break;
-            case 2:
+            case ProgressEnum.PROCESSING_OVERWORLD:
+                await progress.Invoke("Processing Overworld");
+                break;
+            case ProgressEnum.GENERATING_WEST_HYRULE:
                 await progress.Invoke("Generating Western Hyrule");
                 break;
-            case 3:
+            case ProgressEnum.GENERATING_DEATH_MOUNTAIN:
                 await progress.Invoke("Generating Death Mountain");
                 break;
-            case 4:
+            case ProgressEnum.GENERATING_EAST_HYRULE:
                 await progress.Invoke("Generating East Hyrule");
                 break;
-            case 5:
+            case ProgressEnum.GENERATING_MAZE_ISLAND:
                 await progress.Invoke("Generating Maze Island");
                 break;
-            case 6:
+            case ProgressEnum.SHUFFLING_ITEMS_AND_SPELLS:
                 await progress.Invoke("Shuffling Items and Spells");
                 break;
-            case 7:
+            case ProgressEnum.RUNNING_COMPLETABILITY_CHECKS:
                 await progress.Invoke("Running Seed Completability Checks");
                 break;
-            case 8:
+            case ProgressEnum.SHUFFLING_ENEMIES:
+                await progress.Invoke("Shuffling Enemies");
+                break;
+            case ProgressEnum.GENERATING_HINTS:
                 await progress.Invoke("Generating Hints");
                 break;
-            case 9:
+            case ProgressEnum.APPLYING_PATCHES:
+                await progress.Invoke("Applying Patches");
+                break;
+            case ProgressEnum.LINKING_ASSEMBLY:
+                await progress.Invoke("Linking Assembly");
+                break;
+            case ProgressEnum.FINISHING_UP:
                 await progress.Invoke("Finishing up");
                 break;
         }
