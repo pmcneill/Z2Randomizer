@@ -6,6 +6,7 @@ on:
     - main
     - testing
     - extras
+    - sgl
     - '5.2'
 
 env:

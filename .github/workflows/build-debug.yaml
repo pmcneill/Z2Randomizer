@@ -4,9 +4,9 @@ on:
   push:
     branches-ignore:
     - main
-    - extras
     - testing
-    - '5.1'
+    - extras
+    - sgl
     - '5.2'
   pull_request:
 
