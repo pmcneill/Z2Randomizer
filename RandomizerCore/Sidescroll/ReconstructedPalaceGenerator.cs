@@ -234,7 +234,7 @@ public class ReconstructedPalaceGenerator(CancellationToken ct) : PalaceGenerato
                 palace.ResetRooms();
                 count++;
                 palace.ShuffleRooms(r);
-                reachable = palace.AllReachable();
+                reachable = AllReachable(palace);
                 tries++;
                 logger.Debug("Palace room shuffle attempt #" + tries);
             }
@@ -342,6 +342,11 @@ public class ReconstructedPalaceGenerator(CancellationToken ct) : PalaceGenerato
                 }
             }
         }
+    }
+
+    public virtual bool AllReachable(Palace palace)
+    {
+        return palace.AllReachable(allowBossEnterLeft: false);
     }
 
     /// <summary>
