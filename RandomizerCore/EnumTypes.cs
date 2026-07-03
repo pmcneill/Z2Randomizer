@@ -124,6 +124,8 @@ public enum AttackEffectiveness
     LOW,
     [Description("Randomize (Low)"), RandomRangeDouble(Low = .5, High = 1.0)]
     AVERAGE_LOW,
+    [Description("Balanced"),    FixedBytes(3, 3, 4, 6,  8, 12, 16, 18)]
+    BALANCED,
     [Description("Randomize"), RandomRangeDouble(Low = .667, High = 1.5)]
     AVERAGE,
     [Description("Randomize (High)"), RandomRangeDouble(Low = 1.0, High = 1.5)]
@@ -139,12 +141,14 @@ public enum MagicEffectiveness
 {
     [Description("Vanilla")]
     VANILLA,
-    [Description("High Spell Cost"), RandomRangeDouble(Low = 1.5, High = 1.5)]
-    HIGH_COST,
+    //[Description("High Spell Cost"), RandomRangeDouble(Low = 1.5, High = 1.5)]
+    //HIGH_COST,
     [Description("Randomize (High Cost)"), RandomRangeDouble(Low = 1.0, High = 1.5)]
     AVERAGE_HIGH_COST,
     [Description("Randomize"), RandomRangeDouble(Low = .5, High = 1.5)]
     AVERAGE,
+    [Description("Randomize (Controlled)"), RandomRangeDouble(Low = .6, High = 1.4)]
+    AVERAGE_CONTROLLED,
     [Description("Randomize (Low Cost)"), RandomRangeDouble(Low = .5, High = 1.0)]
     AVERAGE_LOW_COST,
     [Description("Low Spell Cost"), RandomRangeDouble(Low = .5, High = .5)]

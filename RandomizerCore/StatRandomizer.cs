@@ -513,6 +513,61 @@ public class StatRandomizer
                 nextVal = (byte)r.Next(min, max);
                 nextVal = Math.Min(nextVal, (byte)120);
 
+                if (statEffectiveness == MagicEffectiveness.AVERAGE_CONTROLLED)
+                {
+                    switch (spellIndex)
+                    {
+                        case 1: // Jump max cost 48 (32 when Dash is in play)
+                            nextVal = Math.Min(nextVal, (byte)48);
+                            if (props.ReplaceFireWithDash)
+                            {
+                                nextVal = Math.Min(nextVal, (byte)32);
+                            }
+                            break;
+                        case 3: // Fairy max cost 80 (64 on lvl 3)
+                            nextVal = Math.Min(nextVal, (byte)80);
+                            if (level >= 2)
+                            {
+                                nextVal = Math.Min(nextVal, (byte)64);
+                            }
+                            break;
+                        case 4: // Dash max cost 48 (32 on lvl 3) - this is in case you have to jump across Saria early
+                            if (props.ReplaceFireWithDash)
+                            {
+                                nextVal = Math.Min(nextVal, (byte)48);
+                                if (level >= 2)
+                                {
+                                    nextVal = Math.Min(nextVal, (byte)32);
+                                }
+                            }
+                            break;
+                        case 5: // Reflect max cost 80 at lvl 3
+                            if (level >= 2)
+                            {
+                                nextVal = Math.Min(nextVal, (byte)80);
+                            }
+                            break;
+                        case 6: // Spell max cost 64 at lvl 4
+                            if (level >= 3)
+                            {
+                                nextVal = Math.Min(nextVal, (byte)64);
+                            }
+                            break;
+                        case 7: // Thunder max cost 96 at lvl 6
+                            if (level >= 5)
+                            {
+                                nextVal = Math.Min(nextVal, (byte)96);
+                            }
+                            break;
+                    }
+                    switch (logicalSpellIndex)
+                    {
+                        case 7: // Thunder and linked Thunder min cost 72
+                            nextVal = Math.Max(nextVal, (byte)72);
+                            break;
+                    }
+                }
+
                 if (level > 0)
                 {
                     byte lastVal = (byte)(newTable[index - 1] >> 1);
