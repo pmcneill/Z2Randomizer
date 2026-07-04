@@ -7,13 +7,7 @@
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <TrimMode>partial</TrimMode>
-    <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
 <!--    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
 <!--    <PublishTrimmed>true</PublishTrimmed>-->
-    <EnableWorkloadRestore>true</EnableWorkloadRestore>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Workload Include="wasm-tools" />
-  </ItemGroup>
 </Project>
