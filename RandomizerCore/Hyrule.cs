@@ -2325,7 +2325,8 @@ public class Hyrule
         }
         if (props.BossItem)
         {
-            shuffler.ShuffleBossDrop(rom, r, a);
+            shuffler.ShuffleBossDrop(rom, r);
+            rom.HandleRandomBossDrop(a);
         }
 
         if (props.StartWithSpellItems)
