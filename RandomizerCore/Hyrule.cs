@@ -645,7 +645,7 @@ public class Hyrule
         else
         {
             westHyrule.pbagCave.Collectables = [Collectable.LARGE_BAG];
-            eastHyrule.pbagCave1.Collectables = [Collectable.LARGE_BAG];
+            eastHyrule.pbagCave1.Collectables = [Collectable.XL_BAG];
             eastHyrule.pbagCave2.Collectables = [Collectable.XL_BAG];
         }
 
