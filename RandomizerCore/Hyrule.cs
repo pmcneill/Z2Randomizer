@@ -280,12 +280,12 @@ public class Hyrule
             ROMData = new ROM(vanillaRomData.ToArray(), true);
 
             bool raftIsRequired = IsRaftAlwaysRequired(props);
-            bool passedValidation = false;
+            byte[] palacesHash = [];
             HashSet<int> freeBanks = [];
             if (ct.IsCancellationRequested) { return new RandomizerResult(false); }
             UpdateProgress(progress, ProgressEnum.GENERATING_PALACES);
 
-            while (palaces.Count != 7 || passedValidation == false)
+            while (palaces.Count != 7)
             {
                 freeBanks = new(ROM.FreeRomBanks);
                 var palaceGenerator = new Palaces();
@@ -323,7 +323,7 @@ public class Hyrule
                 }
 
                 AsmModule sideviewModule = new();
-                passedValidation = await FillPalaceRooms(sideviewModule);
+                palacesHash = await FillPalaceRooms(sideviewModule);
 
 
                 assembler.Add(sideviewModule);
@@ -510,13 +510,13 @@ public class Hyrule
             }
 
             byte[] finalRNGState = new byte[32];
-
             r.NextBytes(finalRNGState);
+
             byte[] hash = MD5Hash.ComputeHash(Encoding.UTF8.GetBytes(
                 Flags +
                 SeedHash +
-                randoRomHash + // ideally this should be all that's required
-                // Util.ReadAllTextFromFile(config.GetRoomsFile()) +
+                randoRomHash +
+                palacesHash +
                 Util.ByteArrayToHexString(finalRNGState)
             ));
 
@@ -1181,18 +1181,8 @@ public class Hyrule
         Debug.Assert(!itemLocsIterator.MoveNext(), "All item locations were not used. This should not happen.");
     }
 
-    private async Task<bool> FillPalaceRooms(AsmModule sideviewModule)
+    private async Task<byte[]> FillPalaceRooms(AsmModule sideviewModule)
     {
-        //AssemblerCommon.AssemblerCommon validation_sideview_module = new();
-        //AssemblerCommon.AssemblerCommon validation_gp_sideview_module = new();
-
-        //This is an awful hack. We need to make a determination about whether the sideviews can fit in the available space,
-        //but there is (at present) no way to test whether that is possible without rendering the entire engine into an irrecoverably
-        //broken state, so we'll just run it twice. As long as this is the first modification that gets made on the engine, this is
-        //guaranteed to succeed iff running on the original engine would succeed.
-        //Jrowe feel free to engineer a less insane fix here.
-        using Assembler validationEngine = CreateAssemblyEngine();
-
         int i = 0;
         //If multiple palaces use the same item room, they'll get consolidated under a single sideview
         //with multiple pointers, but then when the item update happens later, it will affect all the rooms,
@@ -1212,8 +1202,8 @@ public class Hyrule
         //In Reconstructed, enemy pointers aren't separated between 125 and 346, they're just all in 1 big pile,
         //so we just start at the 125 pointer address
         // int enemyAddr = Enemies.NormalPalaceEnemyAddr;
-        Dictionary<byte[], List<Room>> sideviews = new(new Util.StandardByteArrayEqualityComparer());
-        Dictionary<byte[], List<Room>> sideviewsgp = new(new Util.StandardByteArrayEqualityComparer());
+        OrderedDictionary<byte[], List<Room>> sideviews = new(new Util.StandardByteArrayEqualityComparer());
+        OrderedDictionary<byte[], List<Room>> sideviewsgp = new(new Util.StandardByteArrayEqualityComparer());
         foreach (Room room in palaces.Where(palace => palace.Number < 7).SelectMany(palace => palace.AllRooms).Where(room => room.Enabled))
         {
             if (sideviews.TryGetValue(room.SideView, out var value))
@@ -1237,7 +1227,7 @@ public class Hyrule
             }
         }
 
-        var palaceItemBits = new Dictionary<PalaceGrouping, byte[]>
+        var palaceItemBits = new OrderedDictionary<PalaceGrouping, byte[]>
         {
             [PalaceGrouping.Palace125] = ROMData.GetBytes(Room.Group1ItemGetStartAddress, 0x20),
             [PalaceGrouping.Palace346] = ROMData.GetBytes(Room.Group2ItemGetStartAddress, 0x20),
@@ -1290,32 +1280,22 @@ public class Hyrule
             sideviewModule.Byt(itemBits);
         }
 
-        /* this shouldn't be needed anymore
-        try
+        // create a hash of the rooms so we know palaces have not diverged
+        byte[] palaceHash = [];
+        foreach (var key in sideviews.Keys)
         {
-            ROM testRom = new(ROMData);
-            Random testRng = new(SeedHash);
-            //This continues to get worse, the text is based on the palaces and asm patched, so it needs to
-            //be tested here, but we don't actually know what they will be until later, for now i'm just
-            //testing with the vanilla text, but this could be an issue down the line.
-            ApplyAsmPatches(props, validationEngine, testRng, ROMData.GetGameText(), testRom, new StatRandomizer(testRom, props));
-            validationEngine.Add(sideviewModule);
-            await testRom.ApplyAsm(validationEngine); //.Wait(ct);
+            palaceHash = MD5Hash.ComputeHash(Encoding.UTF8.GetBytes("" + palaceHash + key));
         }
-        catch (Exception e)
+        foreach (var key in sideviewsgp.Keys)
         {
-            // Microsoft.ClearScript.ScriptEngine needs to be abstracted for browser
-            if (e.Message.Contains("Could not find space for"))
+            palaceHash = MD5Hash.ComputeHash(Encoding.UTF8.GetBytes("" + palaceHash + key));
+        }
+        foreach (var val in palaceItemBits.Values)
             {
-                logger.Debug(e, "Room packing failed. Retrying.");
-                return false;
+            palaceHash = MD5Hash.ComputeHash(Encoding.UTF8.GetBytes("" + palaceHash + val));
             }
-            logger.Error(e, "Failed to build assembly patches");
-            throw;
+        return palaceHash;
         }
-        */
-        return true;
-    }
 
     private bool IsEverythingReachable(Dictionary<Collectable, bool> itemGet)
     {

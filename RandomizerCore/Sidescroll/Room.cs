@@ -287,7 +287,7 @@ public class Room : IJsonOnDeserialized
         return NewEnemies.Length;
     }
 
-    public void UpdateItemGetBits(Dictionary<PalaceGrouping, byte[]> palaceItemBits)
+    public void UpdateItemGetBits(IDictionary<PalaceGrouping, byte[]> palaceItemBits)
     {
         PalaceGrouping palaceGroup = PalaceGroup ?? throw new Exception("Unable to assign ItemGetBits on a room with no palace group");
 
