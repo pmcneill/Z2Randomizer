@@ -939,7 +939,7 @@ public enum PalaceLengthOption
 {
     [Description("Short; [50% to 65%]"), RandomRangeDouble(Low = 0.50, High = 0.65)]
     SHORT = 0,
-    [Description("Medium; [60% to 80%]"), RandomRangeDouble(Low = 0.60, High = 0.80)]
+    [Description("Medium; [65% to 75%]"), RandomRangeDouble(Low = 0.65, High = 0.75)]
     MEDIUM = 1,
     [Description("Full"), RandomRangeDouble(Low = 0.85, High = 1.15)]
     FULL = 2, // remains 100% for Vanilla palaces
