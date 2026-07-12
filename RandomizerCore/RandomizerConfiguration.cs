@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using NLog;
 using Z2Randomizer.RandomizerCore.Flags;
@@ -251,10 +249,10 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private Biome mazeBiome = Biome.VANILLA;
 
     [Reactive]
-    private ClimateEnum westClimate = ClimateEnum.CLASSIC;
+    private ClimateEnum westClimate = ClimateEnum.VANILLA_WEIGHTED_WEST;
 
     [Reactive]
-    private ClimateEnum eastClimate = ClimateEnum.CLASSIC;
+    private ClimateEnum eastClimate = ClimateEnum.VANILLA_WEIGHTED_EAST;
 
     [Reactive]
     private ClimateEnum dmClimate = ClimateEnum.CLASSIC;
@@ -350,7 +348,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     public bool blockingRoomsInAnyPalaceIncluded() => palaceStylesAreNotAllVanillaOrShuffled();
 
     [Reactive]
-    private PalaceDropStyle palaceDropStyle = PalaceDropStyle.ENTRANCE;
+    private PalaceDropStyle palaceDropStyle = PalaceDropStyle.ANY_EXIT;
     public bool palaceDropStyleIncluded() => palaceStylesAreNotAllVanillaOrShuffled();
 
     [Reactive]
@@ -410,7 +408,6 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     [Minimum(0)]
     [Maximum(6)]
     [ConditionallyIncludeInFlags]
-    [DefaultValue(6)]
     private int palacesToCompleteMax = 6;
     public bool palacesToCompleteMaxIncluded() => palacesToCompleteMin != 6;
 
@@ -694,7 +691,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
 
     [Reactive]
     [IgnoreInFlags]
-    private bool removeFlashing = false;
+    private bool removeFlashing = true;
 
     [Reactive]
     [IgnoreInFlags]
@@ -755,7 +752,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private RiverDevilBlockerOption riverDevilBlockerOption = RiverDevilBlockerOption.PATH;
 
     [Reactive]
-    private bool? eastRocks = false;
+    private bool? eastRocks = true;
 
     [Reactive]
     private bool generateSpoiler = false;
@@ -1876,29 +1873,5 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    /// <summary>
-    /// Should be called with the field to reset as the expression body:
-    /// SetFieldToDefault(() => SettingToReset);
-    /// </summary>
-    public void SetFieldToDefault<T>(Expression<Func<T>> fieldExpr)
-    {
-        if (fieldExpr.Body is not MemberExpression member || member.Member is not FieldInfo field)
-        {
-            throw new ArgumentException("Expression must reference a field");
-        }
-
-        var target = ((ConstantExpression)member.Expression!).Value;
-
-        var attr = field.GetCustomAttribute<DefaultValueAttribute>();
-        if (attr != null)
-        {
-            field.SetValue(target, attr.Value);
-        }
-        else
-        {
-            field.SetValue(target, default);
-        }
     }
 }
