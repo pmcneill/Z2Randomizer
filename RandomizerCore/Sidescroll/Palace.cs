@@ -1497,7 +1497,7 @@ public partial class Palace
                         }
                         else if (room.HasItem)
                         {
-                            sb.Append('I');
+                            sb.Append(room.LinkedRoomName == null ? 'I' : 'i');
                         }
                         else if (room.IsBossRoom)
                         {
@@ -1509,7 +1509,7 @@ public partial class Palace
                         }
                         else
                         {
-                            sb.Append('X');
+                            sb.Append(room.LinkedRoomName == null ? 'X' : 'x');
                         }
                         sb.Append(room.HasRightExit ? '-' : ' ');
                     }
