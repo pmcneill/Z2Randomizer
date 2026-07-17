@@ -508,6 +508,16 @@ static class BiomeExtensions
             _ => false
         };
     }
+
+    public static bool IsSimilar(this Biome self, Biome other)
+    {
+        return (self, other) switch
+        {
+            (Biome.CANYON or Biome.DRY_CANYON, Biome.CANYON or Biome.DRY_CANYON) => true,
+            (Biome.VOLCANO or Biome.CALDERA, Biome.VOLCANO or Biome.CALDERA) => true,
+            _ => self == other
+        };
+    }
 }
 
 [DefaultValue(CLASSIC)]

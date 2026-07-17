@@ -1755,36 +1755,44 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         {
             properties.WestBiome = westBiome;
         }
-        if (eastBiome == Biome.RANDOM || eastBiome == Biome.RANDOM_NO_VANILLA || eastBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
+
+        if (eastBiome.IsMetastyle())
         {
-            int shuffleLimit = eastBiome switch
+            do
             {
-                Biome.RANDOM => 7,
-                Biome.RANDOM_NO_VANILLA => 6,
-                Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
-                _ => throw new ImpossibleException()
-            };
-            properties.EastBiome = r.Next(shuffleLimit) switch
-            {
-                0 => Biome.VANILLALIKE,
-                1 => Biome.ISLANDS,
-                2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
-                3 => Biome.VOLCANO,
-                4 => Biome.MOUNTAINOUS,
-                5 => Biome.VANILLA_SHUFFLE,
-                6 => Biome.VANILLA,
-                _ => throw new Exception("Invalid Biome")
-            };
-        }
-        else if (eastBiome == Biome.RANDOM_CUSTOM)
-        {
-            var keys = Enum.GetValues<Biome>().Where(b => b.IsEastBiome() && biomeWeights.ContainsKey(b));
-            var eastWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
-            var weightedRnd = new LinearWeightedRandom<Biome>(eastWeights);
-            if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one East biome must be included at above zero weight."); }
-            Biome b = weightedRnd.Next(r);
-            if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
-            properties.EastBiome = b;
+                if (eastBiome == Biome.RANDOM || eastBiome == Biome.RANDOM_NO_VANILLA || eastBiome == Biome.RANDOM_NO_VANILLA_OR_SHUFFLE)
+                {
+                    int shuffleLimit = eastBiome switch
+                    {
+                        Biome.RANDOM => 7,
+                        Biome.RANDOM_NO_VANILLA => 6,
+                        Biome.RANDOM_NO_VANILLA_OR_SHUFFLE => 5,
+                        _ => throw new ImpossibleException()
+                    };
+                    properties.EastBiome = r.Next(shuffleLimit) switch
+                    {
+                        0 => Biome.VANILLALIKE,
+                        1 => Biome.ISLANDS,
+                        2 => r.Next(2) == 1 ? Biome.CANYON : Biome.DRY_CANYON,
+                        3 => Biome.VOLCANO,
+                        4 => Biome.MOUNTAINOUS,
+                        5 => Biome.VANILLA_SHUFFLE,
+                        6 => Biome.VANILLA,
+                        _ => throw new Exception("Invalid Biome")
+                    };
+                }
+                else if (eastBiome == Biome.RANDOM_CUSTOM)
+                {
+                    var keys = Enum.GetValues<Biome>().Where(b => b.IsEastBiome() && biomeWeights.ContainsKey(b));
+                    var eastWeights = keys.Select(k => (k, biomeWeights[k])).ToList();
+                    var weightedRnd = new LinearWeightedRandom<Biome>(eastWeights);
+                    if (!weightedRnd.HasPositiveWeight()) { throw new UserFacingException("Impossible Biome Weights", "At least one East biome must be included at above zero weight."); }
+                    Biome b = weightedRnd.Next(r);
+                    if (b == Biome.CANYON) { b = r.Next(2) == 0 ? Biome.CANYON : Biome.DRY_CANYON; }
+                    properties.EastBiome = b;
+                }
+                // Don't allow random-West and random-East to roll the same biome
+            } while (westBiome.IsMetastyle() && properties.WestBiome.IsSimilar(properties.EastBiome));
         }
         else if (eastBiome == Biome.CANYON)
         {
