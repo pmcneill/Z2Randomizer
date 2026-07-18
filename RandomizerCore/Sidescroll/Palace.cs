@@ -1141,7 +1141,7 @@ public partial class Palace
         return false;
     }
 
-    public bool CanReachAnItemRoom(IReadOnlySet<RequirementType> requireables)
+    public bool CanReachAnItemRoom(IReadOnlyCollection<RequirementType> requireables)
     {
         List<Room> pendingRooms = new() { AllRooms.First(i => i.IsEntrance) };
         List<Room> coveredRooms = new();
@@ -1181,7 +1181,7 @@ public partial class Palace
         return false;
     }
 
-    public List<Collectable> GetGettableItems(IReadOnlySet<RequirementType> initialRequireables)
+    public List<Collectable> GetGettableItems(IReadOnlyCollection<RequirementType> initialRequireables)
     {
         HashSet<RequirementType> requireables = new(initialRequireables);
         List<Room> pendingRooms = new() { AllRooms.First(i => i.IsEntrance) };
