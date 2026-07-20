@@ -29,7 +29,7 @@ public class RoomPool
     public RoomPool(PalaceRooms palaceRooms, int palaceNumber, RandomizerProperties props)
     {
         var allRooms = GatherRoomsFromProps(palaceRooms, palaceNumber, props);
-        ApplyPropertyExclusions(props);
+        ApplyPropertyExclusions(allRooms, props);
         GatherLinkedRooms(allRooms, palaceRooms);
         SplitRooms(allRooms, palaceNumber);
         FinalizePool(palaceRooms, palaceNumber, props);
@@ -39,8 +39,8 @@ public class RoomPool
     {
         var roomSet = new List<Room>();
 
-            //4.4 GP room pool is too shallow to create proper palaces from right now, so if you pick 4.4 only,
-            //GP also has vanilla rooms added.
+        //4.4 GP room pool is too shallow to create proper palaces from right now, so if you pick 4.4 only,
+        //GP also has vanilla rooms added.
         bool allowVanilla = props.AllowVanillaRooms
             || (palaceNumber == 7 && !props.AllowVanillaRooms && !props.AllowV4Rooms && props.AllowV5_0Rooms);
 
@@ -62,23 +62,36 @@ public class RoomPool
         return roomSet.ToList();
     }
 
-    private static void AddGroup(List<Room> roomSet, PalaceRooms palaceRooms, RoomGroup group)
+    private static void AddGroup(List<Room> roomList, PalaceRooms palaceRooms, RoomGroup group)
     {
+        // a room can only belong to one group and groups are added first, so we don't need to check contains
         foreach (var room in palaceRooms.RoomsByGroup(group))
         {
-            roomSet.Add(room);
+            roomList.Add(room);
         }
     }
 
-    private void ApplyPropertyExclusions(RandomizerProperties props)
+    private static void AddTag(List<Room> roomList, PalaceRooms palaceRooms, string tag)
+    {
+        foreach (var room in palaceRooms.RoomsByTag(tag))
+        {
+            if (!roomList.Contains(room, ReferenceEqualityComparer.Instance)) // rooms added by tag might overlap with groups
+            {
+                roomList.Add(room);
+            }
+        }
+    }
+
+    private void ApplyPropertyExclusions(List<Room> allRooms, RandomizerProperties props)
     {
         if (props.RemoveLongDeadEnds)
         {
-            RemoveRooms(r => r.HasTag("LongDeadEnd"));
+            allRooms.RemoveAll(r => r.HasTag("LongDeadEnd"));
         }
+
         if (!props.IncludeExpertRooms)
         {
-            RemoveRooms(r => r.HasTag("Expert"));
+            allRooms.RemoveAll(r => r.HasTag("Expert"));
         }
     }
 
@@ -100,7 +113,7 @@ public class RoomPool
                 ItemRooms.Add(room);
             }
             else if (room.IsBossRoom)
-        {
+            {
                 BossRooms.Add(room);
             }
             else if (room.IsThunderBirdRoom)
@@ -120,7 +133,7 @@ public class RoomPool
         {
             if (room.Enabled && room.LinkedRoomName != null)
             {
-                LinkedRooms[room.LinkedRoomName] = palaceRooms.GetRoomByName(room.LinkedRoomName)!;
+                LinkedRooms[room.LinkedRoomName] = palaceRooms.RoomByName(room.LinkedRoomName)!;
                 LinkedRooms[room.Name] = room;
             }
         }
@@ -167,6 +180,10 @@ public class RoomPool
         {
             allowedBlockers.Remove(RequirementType.DASH);
         }
+        if (props.RemoveItems.Contains(Collectable.FAIRY_SPELL))
+        {
+            allowedBlockers.Remove(RequirementType.FAIRY);
+        }
         RemoveRooms(room => !room.IsTraversable(allowedBlockers));
     }
 
@@ -189,6 +206,10 @@ public class RoomPool
         }
 
         var exitTypes = ItemRooms.Select(r => r.CategorizeExits()).Distinct();
+        if (palaceNumber != 7 && exitTypes.Count() < 1)
+        {
+            throw new UserFacingException("Incomplete Room Pool", "Room pool has no item rooms.");
+        }
         foreach (var shape in exitTypes)
         {
             var shapeRooms = ItemRooms.Where(r => r.CategorizeExits() == shape).ToList();
@@ -221,6 +242,7 @@ public class RoomPool
         VanillaBossRoom = palaceRooms.VanillaBossRoom(palaceNumber);
         if (BossRooms.Count == 0)
         {
+            if (VanillaBossRoom == null) { throw new Exception("No boss room in pool!"); }
             BossRooms.Add(VanillaBossRoom);
         }
 
@@ -250,7 +272,7 @@ public class RoomPool
 
     public List<Room> GetItemRoomsForShape(RoomExitType itemRoomExitType)
     {
-        return ItemRoomsByShape[itemRoomExitType];
+        return ItemRoomsByShape.GetValueOrDefault(itemRoomExitType, []);
     }
 
     public void RemoveDuplicates(RandomizerProperties props, Room roomThatWasUsed)
@@ -291,22 +313,36 @@ public class RoomPool
         Entrances.RemoveAll(room => RoomMatchesIncludingLinked(room, removalCondition));
         BossRooms.RemoveAll(room => RoomMatchesIncludingLinked(room, removalCondition));
         TbirdRooms.RemoveAll(room => RoomMatchesIncludingLinked(room, removalCondition));
-        ItemRooms.RemoveAll(room => RoomMatchesIncludingLinked(room, removalCondition));
         RemoveFromItemRooms(removalCondition);
     }
 
     void RemoveFromItemRooms(Room room)
     {
         ItemRooms.Remove(room);
+
+        var directionsToRemove = new List<Direction>();
         foreach (Direction direction in ItemRoomsByDirection.Keys)
         {
             var originalTable = ItemRoomsByDirection[direction];
-            var newTable = (TableWeightedRandom<Room>)originalTable.Subtract(room);
+            var newTable = (TableWeightedRandom<Room>?)originalTable.Subtract(room);
             if (newTable != originalTable)
             {
-                ItemRoomsByDirection[direction] = newTable;
+                if (newTable == null)
+                {
+                    directionsToRemove.Add(direction);
+                }
+                else
+                {
+                    ItemRoomsByDirection[direction] = newTable;
+                }
             }
         }
+
+        foreach (var dir in directionsToRemove)
+        {
+            ItemRoomsByDirection.Remove(dir);
+        }
+
         foreach (var key in ItemRoomsByShape.Keys)
         {
             ItemRoomsByShape[key].Remove(room);
@@ -315,6 +351,9 @@ public class RoomPool
 
     void RemoveFromItemRooms(Predicate<Room> removalCondition)
     {
+        ItemRooms.RemoveAll(room => RoomMatchesIncludingLinked(room, removalCondition));
+
+        var directionsToRemove = new List<Direction>();
         foreach (Direction direction in ItemRoomsByDirection.Keys)
         {
             var originalTable = ItemRoomsByDirection[direction];
@@ -323,13 +362,25 @@ public class RoomPool
             {
                 if (RoomMatchesIncludingLinked(room, removalCondition))
                 {
-                    newTable = (TableWeightedRandom<Room>)newTable.Subtract(room);
+                    newTable = (TableWeightedRandom<Room>?)newTable?.Subtract(room);
                 }
             }
             if (newTable != originalTable)
             {
-                ItemRoomsByDirection[direction] = newTable;
+                if (newTable == null)
+                {
+                    directionsToRemove.Add(direction);
+                }
+                else
+                {
+                    ItemRoomsByDirection[direction] = newTable;
+                }
             }
+        }
+
+        foreach (var dir in directionsToRemove)
+        {
+            ItemRoomsByDirection.Remove(dir);
         }
 
         foreach (var key in ItemRoomsByShape.Keys)
@@ -360,10 +411,10 @@ public class RoomPool
     public Dictionary<RoomExitType, List<Room>> CategorizeNormalRoomExits(bool linkRooms = false)
     {
         Dictionary<RoomExitType, List<Room>> categorizedRooms = new Dictionary<RoomExitType, List<Room>>(NormalRooms.Count);
-        foreach(Room room in NormalRooms)
+        foreach (Room room in NormalRooms)
         {
             var type = GetMergedExitType(room);
-            if(!categorizedRooms.TryGetValue(type, out List<Room>? value))
+            if (!categorizedRooms.TryGetValue(type, out List<Room>? value))
             {
                 value = new List<Room>(NormalRooms.Count);
                 categorizedRooms[type] = value;
@@ -373,34 +424,32 @@ public class RoomPool
         return categorizedRooms;
     }
 
-    /// When full duplicate protection is enabled, we remove all
-    /// but one rooms of each duplicate group at random.
-    ///
-    /// This should be called for the first time by the palace generator
-    /// before it removes any rooms.
+    /// <summary>
+    /// When full duplicate protection is enabled, removes all but one room
+    /// from each duplicate group at random. Call before removing any rooms.
+    /// </summary>
     public void DetermineRoomVariants(Random r)
     {
         if (DuplicateGroupLookup == null)
-        {
             DuplicateGroupLookup = NormalRooms
-                .Where(room => room.DuplicateGroup != null && room.DuplicateGroup != "")
-                .ToLookup(room => room.DuplicateGroup);
-        }
-        HashSet<Room> toRemove = new();
+                .Where(room => !string.IsNullOrEmpty(room.DuplicateGroup))
+                .ToLookup(room => room.DuplicateGroup!);
+
+        var toRemove = new HashSet<Room>();
         foreach (var group in DuplicateGroupLookup)
         {
             // randomly pick one room from the duplicate group to keep
-            int keepIndex = r.Next(group.Count());
-            Room keep = group.ElementAt(keepIndex);
+            Room keep = group.ElementAt(r.Next(group.Count()));
             foreach (var room in group)
             {
                 if (!ReferenceEquals(room, keep)) { toRemove.Add(room); }
             }
         }
+
         NormalRooms.RemoveAll(toRemove.Contains);
     }
 
-    RoomExitType GetMergedExitType(Room room)
+    public RoomExitType GetMergedExitType(Room room)
     {
         var type = room.CategorizeExits();
         if (room.LinkedRoomName != null && LinkedRooms.TryGetValue(room.LinkedRoomName, out var linked))
