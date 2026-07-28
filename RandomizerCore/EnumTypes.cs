@@ -201,16 +201,20 @@ public enum EnemyLifeOption
 {
     [Description("Vanilla; (No Randomization)")]
     VANILLA,
+
     [Description("Narrow; [-25% to +25%]"), RandomRangeDouble(Low = 0.75, High = 1.25)]
     NARROW,
     [Description("Medium; [-50% to +50%]"), RandomRangeDouble(Low = 0.5, High = 1.5)]
     MEDIUM,
     [Description("Wide; [-75% to +200%]"), RandomRangeDouble(Low = 0.25, High = 3.0)]
     WIDE,
-    [Description("Medium High; [-50% to +100%]"), RandomRangeDouble(Low = 0.5, High = 2.0)]
-    MEDIUM_HIGH,
-    [Description("High; [-0% to +100%]"), RandomRangeDouble(Low = 1.0, High = 2.0)]
+
+    [Description("Slightly High; [-0% to +33%]"), RandomRangeDouble(Low = 1.0, High = 1.33)]
+    SLIGHTLY_HIGH,
+    [Description("High; [-50% to +100%]"), RandomRangeDouble(Low = 0.5, High = 2.0)]
     HIGH,
+    [Description("Very High; [-0% to +100%]"), RandomRangeDouble(Low = 1.0, High = 2.0)]
+    VERY_HIGH,
 }
 
 [DefaultValue(ONLY_BOTS)]
