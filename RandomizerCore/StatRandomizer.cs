@@ -508,30 +508,48 @@ public class StatRandomizer
                         }
                     }
                 }
-                int min = (int)(baseVal * range.Low);
-                int max = (int)(baseVal * range.High);
-                nextVal = (byte)r.Next(min, max);
+                int min = (int)Math.Round(baseVal * range.Low);
+                int max = (int)Math.Round(baseVal * range.High);
+                nextVal = (byte)r.Next(min, max + 1);
                 nextVal = Math.Min(nextVal, (byte)120);
 
                 if (statEffectiveness == MagicEffectiveness.AVERAGE_CONTROLLED)
                 {
-                    switch (spellIndex)
+                    switch (spellIndex + 1) // 1-indexed for sanity
                     {
-                        case 1: // Jump max cost 48 (32 when Dash is in play)
+                        case 2: // Jump max cost 48 (32 when Dash is in play)
                             nextVal = Math.Min(nextVal, (byte)48);
                             if (props.ReplaceFireWithDash)
                             {
                                 nextVal = Math.Min(nextVal, (byte)32);
                             }
                             break;
-                        case 3: // Fairy max cost 80 (64 on lvl 3)
-                            nextVal = Math.Min(nextVal, (byte)80);
-                            if (level >= 2)
+                        case 3: // LIFE
+                            switch (level + 1) // also 1-indexed for sanity
                             {
-                                nextVal = Math.Min(nextVal, (byte)64);
+                                case 1:
+                                    nextVal = Math.Min(nextVal, (byte)64); // Life max cost 64 at lvl 1
+                                    break;
+                                case 3:
+                                    nextVal = Math.Min(nextVal, (byte)48); // Life max cost 48 at lvl 3 (1:1 ratio HP for MP)
+                                    break;
                             }
                             break;
-                        case 4: // Dash max cost 48 (32 on lvl 3) - this is in case you have to jump across Saria early
+                        case 4: // Fairy max cost 80 (64 on lvl 3)
+                            switch (level + 1) // also 1-indexed for sanity
+                            {
+                                case 1:
+                                    nextVal = Math.Min(nextVal, (byte)80);
+                                    break;
+                                case 3:
+                                    nextVal = Math.Min(nextVal, (byte)64);
+                                    break;
+                                case 6:
+                                    nextVal = Math.Min(nextVal, (byte)48);
+                                    break;
+                            }
+                            break;
+                        case 5: // Dash max cost 48 (32 on lvl 3) - this is in case you have to jump across Saria early
                             if (props.ReplaceFireWithDash)
                             {
                                 nextVal = Math.Min(nextVal, (byte)48);
@@ -541,29 +559,39 @@ public class StatRandomizer
                                 }
                             }
                             break;
-                        case 5: // Reflect max cost 80 at lvl 3
+                        case 6: // Reflect max cost 80 at lvl 3
                             if (level >= 2)
                             {
                                 nextVal = Math.Min(nextVal, (byte)80);
                             }
                             break;
-                        case 6: // Spell max cost 64 at lvl 4
+                        case 7: // Spell max cost 64 at lvl 4
                             if (level >= 3)
                             {
                                 nextVal = Math.Min(nextVal, (byte)64);
                             }
                             break;
-                        case 7: // Thunder max cost 96 at lvl 6
-                            if (level >= 5)
-                            {
-                                nextVal = Math.Min(nextVal, (byte)96);
-                            }
-                            break;
                     }
-                    switch (logicalSpellIndex)
+
+                    switch (logicalSpellIndex + 1) // 1-indexed for sanity
                     {
-                        case 7: // Thunder and linked Thunder min cost 72
-                            nextVal = Math.Max(nextVal, (byte)72);
+                        case 8: // THUNDER (+ linked Thunder)
+                            nextVal = Math.Max(nextVal, (byte)72); // Thunder and linked Thunder min cost 72
+                            switch (level + 1) // also 1-indexed for sanity
+                            {
+                                case 5:
+                                    nextVal = Math.Min(nextVal, (byte)96); // Thunder max cost 96 at lvl 5
+                                    break;
+                                case 6:
+                                    nextVal = Math.Min(nextVal, (byte)80); // Thunder max cost 80 at lvl 6
+                                    break;
+                                case 7:
+                                    nextVal = 72;
+                                    break;
+                                case 8:
+                                    nextVal = 64;
+                                    break;
+                            }
                             break;
                     }
                 }
