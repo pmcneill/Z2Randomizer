@@ -923,7 +923,7 @@ public sealed class EastHyrule : World
             xmin = 5;
             ymin = 5;
             xmax = MapColumns - 6;
-            ymax = MapColumns - 6;
+            ymax = MapRows - 6;
         }
         IntVector2 palacePos = new(RNG.Next(xmin, xmax), RNG.Next(ymin, ymax));
 
@@ -1002,6 +1002,7 @@ public sealed class EastHyrule : World
         int vodRoutes = biome == Biome.VOLCANO ? RNG.Next(1, 3) : 1;
         IntVector2 forwardDir = horizontalPath ? IntVector2.EAST : IntVector2.SOUTH;
         IntVector2 sideDir = horizontalPath ? IntVector2.SOUTH : IntVector2.EAST;
+        List<IntVector2> vodLavaPositions = [];
 
         void TerraformVodCave(IntVector2 p, IntVector2 delta)
         {
@@ -1059,6 +1060,7 @@ public sealed class EastHyrule : World
                 if (!WithinMapBounds(pos)) { break; }
 
                 map[pos] = Terrain.LAVA;
+                vodLavaPositions.Add(pos);
 
                 if (!isCalderaLike)
                 {
@@ -1087,15 +1089,13 @@ public sealed class EastHyrule : World
             return true;
         }
 
-        // tries to place a enemy trap
-        bool TryPlaceTrap(IntVector2 trapPos, ref int trapsToPlaceRemaining, ref int trapIndex)
+        bool TryPlaceTrap(IntVector2 trapPos, ref int trapIndex)
         {
             var trap = passthroughLocations[trapIndex];
             if (ValidTrapTilePosition(trapPos) != null)
             {
                 trap.Pos = trapPos;
                 trap.CanShuffle = false;
-                trapsToPlaceRemaining--;
                 trapIndex++;
                 return true;
             }
@@ -1116,7 +1116,7 @@ public sealed class EastHyrule : World
 
         for (int k = 0; k < vodRoutes; k++)
         {
-            int trapsPlaced = vodRoutes == 2 ? (k == 0 ? 2 : 1) : 3;
+            int trapsRemaining = vodRoutes == 2 ? (k == 0 ? 2 : 1) : 3;
             int minAdjust = -1;
             int maxAdjust = 2;
             int tilesPlaced = 0;
@@ -1134,6 +1134,7 @@ public sealed class EastHyrule : World
 
                 tilesPlaced++;
                 map[currentPos] = Terrain.LAVA;
+                vodLavaPositions.Add(currentPos);
 
                 // roll potential zig-zag offset
                 int adjust = RollAdjust(currentPos, delta, minAdjust, maxAdjust);
@@ -1155,7 +1156,6 @@ public sealed class EastHyrule : World
                             map[currentPos - sideDir] = Terrain.MOUNTAIN;
                             map[currentPos + sideDir] = Terrain.MOUNTAIN;
                         }
-                        map[currentPos] = Terrain.LAVA;
                         if (GetLocationAt(currentPos + delta) != null)
                         {
                             return false;
@@ -1167,7 +1167,7 @@ public sealed class EastHyrule : World
 
                 // try to place trap locations
                 bool shouldPlaceTrap = (cavePlaced && adjust == 0) || Math.Abs(adjust) > 1;
-                if (shouldPlaceTrap && trapsPlaced > 0)
+                if (shouldPlaceTrap && trapsRemaining > 0)
                 {
                     var rotate = isCanyon ^ isHorizontal;
                     IntVector2 trapDir = rotate ? -sideDir : -forwardDir;
@@ -1185,8 +1185,9 @@ public sealed class EastHyrule : World
                         _ => 1,
                     };
                     IntVector2 trapTilePos = currentPos + trapStep * trapDir;
-                    if (TryPlaceTrap(trapTilePos, ref trapsPlaced, ref traps))
+                    if (TryPlaceTrap(trapTilePos, ref traps))
                     {
+                        trapsRemaining--;
                         if (AdjustRangeAfterTrap(adjust) is ValueTuple<int, int> newRange)
                         {
                             (minAdjust, maxAdjust) = newRange;
@@ -1291,6 +1292,15 @@ public sealed class EastHyrule : World
             minAdjust = -1;
             maxAdjust = 2;
             cavePlaced = false;
+        }
+
+        // try to place any unplaced traps once more
+        while (traps < 3 && vodLavaPositions.Count > 0)
+        {
+            var i = RNG.Next(vodLavaPositions.Count);
+            var trapTilePos = vodLavaPositions[i];
+            vodLavaPositions.RemoveAt(i);
+            TryPlaceTrap(trapTilePos, ref traps);
         }
 
         return true;
