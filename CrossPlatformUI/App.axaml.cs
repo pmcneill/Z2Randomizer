@@ -50,6 +50,7 @@ public sealed partial class App : Application // , IDisposable
 #if DEBUG
         Version += " (Debug)";
 #endif
+        Version = "SGL2026";
 
         Title = $"Zelda II Randomizer {Version}";
     }
