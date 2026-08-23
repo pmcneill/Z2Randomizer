@@ -901,6 +901,9 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
     [Reactive]
     private bool revealWalkthroughWalls = false;
 
+    [Reactive]
+    private bool revealHiddenJars = false;
+
     //Meta
     [Reactive]
     [Required]
@@ -1453,6 +1456,7 @@ public sealed partial class RandomizerConfiguration() : INotifyPropertyChanged
         properties.HardBosses = hardBosses;
         properties.AggressiveTbird = aggressiveTbird;
         properties.RevealWalkthroughWalls = revealWalkthroughWalls;
+        properties.RevealHiddenJars = revealHiddenJars;
 
         //Enemies
         properties.ShuffleEnemyHP = shuffleEnemyHP;

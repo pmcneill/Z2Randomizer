@@ -2547,6 +2547,9 @@ DrawHiddenJarBank4:
     lda zp_01
     clc
     adc #$04                          ; center-adjust the sprite
+    bcc FinalizeJarBank4
+    rts                               ; don't draw if wrapped
+FinalizeJarBank4:
     sta zp_01
     lda #$00
     sta zp_02                         ; no sprite mirroring
@@ -2573,6 +2576,9 @@ DrawHiddenJarBank5:
     lda zp_01
     clc
     adc #$04                          ; center-adjust the sprite
+    bcc FinalizeJarBank5
+    rts                               ; don't draw if wrapped
+FinalizeJarBank5:
     sta zp_01
     lda #$00
     sta zp_02                         ; no sprite mirroring
