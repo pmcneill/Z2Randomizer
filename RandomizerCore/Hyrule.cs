@@ -4186,6 +4186,8 @@ bank5_Pointer_table_for_End_Credits:
             RestartWithPalaceUpA(engine);
         }
 
+        rom.RevealHiddenJars(engine);
+
         if (props.RevealWalkthroughWalls)
         {
             rom.RevealWalkthroughWalls();
