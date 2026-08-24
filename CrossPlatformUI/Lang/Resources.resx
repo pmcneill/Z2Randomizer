@@ -306,7 +306,7 @@ retroactively generate a spoiler file for a non-spoiler seed.</value>
 <value>Replaces all false wall and floor tiles with background tiles.</value>
 	</data>
 	<data name="RevealHiddenJarsToolTip" xml:space="preserve">
-<value>Displays a jar sprite over hidden red jars in palace blocks.</value>
+<value>Show an orange jar to reveal places to hit for a hidden jar or enemy.</value>
 	</data>
 	<data name="ShufflePalaceItemsToolTip" xml:space="preserve">
 <value>Each normal palace contains exactly one item room. When selected, this shuffles which item
